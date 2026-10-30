@@ -1,0 +1,18 @@
+
+image: node:24
+
+stages:
+  - test
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - .npm/
+
+unit_test:
+  stage: test
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm test
