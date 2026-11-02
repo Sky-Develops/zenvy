@@ -7,19 +7,19 @@ export const PlayerProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(240);
+  const [duration, setDuration] = useState(0);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isLoop, setIsLoop] = useState(false);
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Play track and initialize telemetry
+  // Play track and open player
   const playTrack = (track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
     setIsPlayerOpen(true);
     setCurrentTime(0);
-    setDuration(track.durationSec || 240);
+    setDuration(track.durationSec || 0);
   };
 
   const pauseTrack = () => setIsPlaying(false);
@@ -43,25 +43,7 @@ export const PlayerProvider = ({ children }) => {
     setIsMuted((prev) => !prev);
   };
 
-  // Simulate progress playback ticker
-  useEffect(() => {
-    let interval = null;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= duration) {
-            if (isLoop) return 0;
-            setIsPlaying(false);
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying, duration, isLoop]);
-
-  // Global Keyboard shortcuts: Spacebar to toggle playback (when not inside input/textarea)
+  // Keyboard shortcut: Spacebar to toggle playback
   useEffect(() => {
     const handleKeyDown = (e) => {
       const activeTag = document.activeElement?.tagName?.toLowerCase();
@@ -89,9 +71,13 @@ export const PlayerProvider = ({ children }) => {
         isLoop,
         volume,
         isMuted,
+        setIsPlaying,
+        setCurrentTime,
+        setDuration,
         setIsShuffle,
         setIsLoop,
         setVolume,
+        setIsMuted,
         toggleMute,
         seekTo,
         playTrack,

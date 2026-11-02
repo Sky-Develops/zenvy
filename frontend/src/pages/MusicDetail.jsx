@@ -9,7 +9,8 @@ import {
   AlertCircle, 
   Activity, 
   Sparkles, 
-  Play
+  Play,
+  Pause
 } from 'lucide-react';
 import { musicApi, favoritesApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
@@ -25,9 +26,11 @@ export const MusicDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [playerError, setPlayerError] = useState(false);
 
-  const { playTrack } = usePlayer();
+  const { playTrack, currentTrack, isPlaying, togglePlay } = usePlayer();
+
+  const trackId = track?.videoId || track?.id || id;
+  const isCurrentActive = (currentTrack?.videoId || currentTrack?.id) === trackId;
 
   useEffect(() => {
     fetchDetail();
@@ -36,7 +39,6 @@ export const MusicDetail = () => {
   const fetchDetail = async () => {
     setLoading(true);
     setError('');
-    setPlayerError(false);
     try {
       const data = await musicApi.getDetail(id);
       setTrack(data);
@@ -46,9 +48,9 @@ export const MusicDetail = () => {
         musicApi.search('')
       ]);
 
-      const trackId = data.videoId || data.id || id;
-      setIsFavorite(favs.some(f => (f.videoId || f.id) === trackId));
-      setSimilarTracks(allList.filter(item => (item.videoId || item.id) !== trackId));
+      const tId = data.videoId || data.id || id;
+      setIsFavorite(favs.some(f => (f.videoId || f.id) === tId));
+      setSimilarTracks(allList.filter(item => (item.videoId || item.id) !== tId));
     } catch (err) {
       setError('Gagal memuat informasi frekuensi lagu.');
     } finally {
@@ -58,10 +60,10 @@ export const MusicDetail = () => {
 
   const handleToggleFavorite = async () => {
     if (!track) return;
-    const trackId = track.videoId || track.id || id;
+    const tId = track.videoId || track.id || id;
     try {
       if (isFavorite) {
-        await favoritesApi.remove(trackId);
+        await favoritesApi.remove(tId);
         setIsFavorite(false);
       } else {
         await favoritesApi.add(track);
@@ -76,6 +78,14 @@ export const MusicDetail = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleMainActionPlay = () => {
+    if (isCurrentActive) {
+      togglePlay();
+    } else {
+      playTrack(track);
+    }
   };
 
   if (loading) {
@@ -104,8 +114,6 @@ export const MusicDetail = () => {
       </div>
     );
   }
-
-  const trackId = track.videoId || track.id || id;
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-8 py-6 space-y-8">
@@ -166,11 +174,20 @@ export const MusicDetail = () => {
 
           <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
             <button
-              onClick={() => playTrack(track)}
-              className="px-6 py-2.5 rounded-lg bg-white text-black font-bold text-xs flex items-center gap-2 hover:scale-105 transition shadow-lg"
+              onClick={handleMainActionPlay}
+              className="px-6 py-2.5 rounded-lg bg-white text-black font-bold text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition shadow-lg"
             >
-              <Play className="w-4 h-4 fill-current text-black" />
-              <span>Putar Trek</span>
+              {isCurrentActive && isPlaying ? (
+                <>
+                  <Pause className="w-4 h-4 fill-current text-black" />
+                  <span>Jeda Audio</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-4 h-4 fill-current text-black" />
+                  <span>Putar Trek</span>
+                </>
+              )}
             </button>
 
             <button
@@ -196,29 +213,38 @@ export const MusicDetail = () => {
         </div>
       </div>
 
-      {/* Grid Utama: Player IFrame YouTube + Panel DNA Musikal */}
+      {/* Grid Utama: Player Terikat & Terpadu + Panel DNA Musikal */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Kolom Kiri 8: Player Integrasi IFrame YouTube */}
+        {/* Kolom Kiri 8: Canvas Media Player yang Terpadu dengan Kontrol Bawah */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zenvy-border shadow-2xl">
-            <iframe
-              id="youtube-detail-player"
-              title={track.title}
-              src={`https://www.youtube-nocookie.com/embed/${trackId}?autoplay=1&enablejsapi=1`}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              onError={() => setPlayerError(true)}
+          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zenvy-border shadow-2xl group">
+            <img
+              src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
+              alt={track.title}
+              className={`w-full h-full object-cover transition-all duration-500 ${
+                isCurrentActive && isPlaying ? 'scale-105 opacity-80' : 'opacity-70 group-hover:scale-105'
+              }`}
             />
-          </div>
-
-          {playerError && (
-            <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>Catatan pemutaran: Jika video dibatasi hak cipta oleh YouTube, aliran telemetri audio tetap berjalan normal.</span>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/30 flex flex-col items-center justify-center gap-3">
+              <button
+                onClick={handleMainActionPlay}
+                className="w-16 h-16 rounded-full bg-zenvy-violet hover:bg-purple-600 text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition"
+                title={isCurrentActive && isPlaying ? 'Jeda Audio' : 'Putar Audio'}
+              >
+                {isCurrentActive && isPlaying ? (
+                  <Pause className="w-7 h-7 fill-current" />
+                ) : (
+                  <Play className="w-7 h-7 fill-current ml-1" />
+                )}
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-white px-3 py-1 rounded-full bg-black/70 border border-white/20 shadow">
+                  {isCurrentActive && isPlaying ? 'Sedang Berputar di Panel Bawah' : 'Klik untuk Memutar Audio & Video'}
+                </span>
+              </div>
             </div>
-          )}
+          </div>
 
           {/* Sinopsis Trek & Konteks Suasana */}
           <div className="bg-zenvy-card rounded-xl p-5 border border-zenvy-border space-y-3">
