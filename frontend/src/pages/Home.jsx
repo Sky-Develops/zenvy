@@ -93,7 +93,7 @@ export const Home = () => {
 
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zenvy-card border border-zenvy-border text-xs text-zinc-300 font-medium">
-            <span className="w-2 h-2 rounded-full bg-purple-500" />
+
             98.4 kHz Langsung
           </span>
         </div>

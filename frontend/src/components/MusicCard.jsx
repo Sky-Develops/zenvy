@@ -83,7 +83,7 @@ export const MusicCard = ({
         {/* Active playback indicator (Statis tanpa kedip) */}
         {isCurrentActive && (
           <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-zenvy-violet text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow">
-            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+
             Aktif
           </div>
         )}

@@ -112,7 +112,7 @@ export const Sidebar = ({ onOpenOmnibar }) => {
                 to={`/explore?habitat=${encodeURIComponent(hab.name)}`}
                 className="block px-3 py-1.5 text-xs text-zenvy-muted hover:text-white rounded hover:bg-zenvy-card transition truncate"
               >
-                ● {hab.name}
+                {hab.name}
               </NavLink>
             ))}
           </div>
@@ -123,7 +123,7 @@ export const Sidebar = ({ onOpenOmnibar }) => {
       <div className="p-3 m-3 rounded-xl bg-zenvy-card border border-zenvy-border space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="text-zinc-300 flex items-center gap-1.5 text-[11px]">
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+
             Pemutar YouTube
           </span>
           <span className="text-[10px] font-mono text-zinc-400 px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border">
