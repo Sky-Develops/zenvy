@@ -205,7 +205,7 @@ export const MusicDetail = () => {
             <iframe
               id="youtube-detail-player"
               title={track.title}
-              src={`https://www.youtube.com/embed/${trackId}?autoplay=1&enablejsapi=1&origin=${window.location.origin}`}
+              src={`https://www.youtube-nocookie.com/embed/${trackId}?autoplay=1&enablejsapi=1`}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen

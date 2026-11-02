@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Play, 
@@ -51,30 +51,86 @@ export const MusicPlayer = () => {
 
   const trackId = currentTrack.videoId || currentTrack.id;
 
+  useEffect(() => {
+    const iframe = document.getElementById('youtube-player-iframe');
+    if (!iframe?.contentWindow) return;
+    try {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: isPlaying ? 'playVideo' : 'pauseVideo',
+          args: []
+        }),
+        '*'
+      );
+    } catch (e) {
+      // ignore
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    const iframe = document.getElementById('youtube-player-iframe');
+    if (!iframe?.contentWindow) return;
+    try {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: isMuted ? 'mute' : 'unMute',
+          args: []
+        }),
+        '*'
+      );
+      iframe.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: 'setVolume',
+          args: [isMuted ? 0 : volume]
+        }),
+        '*'
+      );
+    } catch (e) {
+      // ignore
+    }
+  }, [volume, isMuted]);
+
   const handleSeek = (e) => {
     const targetVal = Number(e.target.value);
     seekTo(targetVal);
+    const iframe = document.getElementById('youtube-player-iframe');
+    if (iframe?.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage(
+          JSON.stringify({
+            event: 'command',
+            func: 'seekTo',
+            args: [targetVal, true]
+          }),
+          '*'
+        );
+      } catch (e) {
+        // ignore
+      }
+    }
   };
 
   return (
     <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
       
-      {/* Layar Video IFrame YouTube Diperluas */}
-      {showVideo && (
-        <div className="max-w-4xl mx-auto p-4 border-b border-zenvy-border">
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xl border border-zenvy-border">
-            <iframe
-              id="youtube-player-iframe"
-              title={currentTrack.title}
-              src={`https://www.youtube.com/embed/${trackId}?autoplay=${isPlaying ? 1 : 0}&enablejsapi=1&origin=${window.location.origin}`}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              onError={() => setHasError(true)}
-            />
-          </div>
+      {/* Layar Video & Audio Player IFrame YouTube */}
+      <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-zenvy-border block" : "fixed -top-[9999px] -left-[9999px] w-1 h-1 opacity-0 pointer-events-none"}>
+        <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xl border border-zenvy-border">
+          <iframe
+            id="youtube-player-iframe"
+            key={trackId}
+            title={currentTrack.title}
+            src={`https://www.youtube-nocookie.com/embed/${trackId}?autoplay=1&enablejsapi=1`}
+            className="w-full h-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            onError={() => setHasError(true)}
+          />
         </div>
-      )}
+      </div>
 
       {/* Spanduk Notifikasi Error Pemutaran */}
       {hasError && (
