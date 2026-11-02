@@ -47,13 +47,10 @@ export const MusicPlayer = () => {
   const [hasError, setHasError] = useState(false);
   const [isFav, setIsFav] = useState(false);
 
-  if (!isPlayerOpen || !currentTrack) return null;
-
-  const trackId = currentTrack.videoId || currentTrack.id;
 
   useEffect(() => {
     const iframe = document.getElementById('youtube-player-iframe');
-    if (!iframe?.contentWindow) return;
+    if (!isPlayerOpen || !currentTrack || !iframe?.contentWindow) return;
     try {
       iframe.contentWindow.postMessage(
         JSON.stringify({
@@ -66,11 +63,11 @@ export const MusicPlayer = () => {
     } catch (e) {
       // ignore
     }
-  }, [isPlaying]);
+  }, [isPlaying, isPlayerOpen, currentTrack]);
 
   useEffect(() => {
     const iframe = document.getElementById('youtube-player-iframe');
-    if (!iframe?.contentWindow) return;
+    if (!isPlayerOpen || !currentTrack || !iframe?.contentWindow) return;
     try {
       iframe.contentWindow.postMessage(
         JSON.stringify({
@@ -91,7 +88,7 @@ export const MusicPlayer = () => {
     } catch (e) {
       // ignore
     }
-  }, [volume, isMuted]);
+  }, [volume, isMuted, isPlayerOpen, currentTrack]);
 
   const handleSeek = (e) => {
     const targetVal = Number(e.target.value);
@@ -112,6 +109,10 @@ export const MusicPlayer = () => {
       }
     }
   };
+
+  if (!isPlayerOpen || !currentTrack) return null;
+
+  const trackId = currentTrack.videoId || currentTrack.id;
 
   return (
     <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
