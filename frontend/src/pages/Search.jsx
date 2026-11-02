@@ -184,7 +184,7 @@ export const Search = () => {
                       className="w-20 h-20 rounded-xl object-cover border border-zenvy-border shadow"
                     />
                     <div className="min-w-0">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-zenvy-mint/10 text-zenvy-mint border border-zenvy-mint/20">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-zenvy-card text-zinc-300 border border-zenvy-border">
                         {topMatch.habitat || 'Frekuensi Terbaik'}
                       </span>
                       <h4 className="text-base font-bold text-white mt-1.5 truncate group-hover:text-zenvy-violetSoft transition">

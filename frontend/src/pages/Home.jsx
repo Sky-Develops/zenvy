@@ -92,8 +92,8 @@ export const Home = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zenvy-card border border-zenvy-border text-xs text-zenvy-mint font-medium">
-            <span className="w-2 h-2 rounded-full bg-zenvy-mint animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zenvy-card border border-zenvy-border text-xs text-zinc-300 font-medium">
+            <span className="w-2 h-2 rounded-full bg-purple-500" />
             98.4 kHz Langsung
           </span>
         </div>
@@ -102,7 +102,7 @@ export const Home = () => {
       {/* Frekuensi Unggulan (Hero Banner) */}
       {featuredTrack && (
         <section className="relative rounded-2xl bg-gradient-to-r from-zenvy-cardElevated via-zenvy-card to-zenvy-obsidian border border-zenvy-border overflow-hidden shadow-2xl p-6 sm:p-8">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-zenvy-violet/15 rounded-full blur-3xl pointer-events-none" />
+
 
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             
@@ -112,7 +112,7 @@ export const Home = () => {
                 <span className="px-2.5 py-1 rounded bg-zenvy-violet text-white text-[10px] font-bold uppercase tracking-wider">
                   Frekuensi Unggulan
                 </span>
-                <span className="px-2.5 py-1 rounded bg-zenvy-mint/10 text-zenvy-mint border border-zenvy-mint/20 text-[10px] font-mono font-semibold">
+                <span className="px-2.5 py-1 rounded bg-zenvy-card text-zinc-300 border border-zenvy-border text-[10px] font-mono font-semibold">
                   320kbps OPUS
                 </span>
                 {featuredTrack.musicalKey && (
@@ -183,7 +183,7 @@ export const Home = () => {
               to={`/explore?habitat=${encodeURIComponent(hab.name)}`}
               className="p-4 rounded-xl bg-zenvy-card hover:bg-zenvy-cardElevated border border-zenvy-border transition group"
             >
-              <p className="text-[10px] font-bold text-zenvy-mint uppercase">{hab.activeListeners}</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase">{hab.activeListeners}</p>
               <h4 className="text-sm font-bold text-white mt-1 group-hover:text-zenvy-violetSoft transition truncate">
                 {hab.name}
               </h4>
@@ -198,7 +198,7 @@ export const Home = () => {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-zenvy-mint" />
+              <Sparkles className="w-4 h-4 text-purple-400" />
               <span>Rekomendasi Untuk Anda (Kecocokan 88%–98%)</span>
             </h3>
             <p className="text-xs text-zenvy-muted">Katalog audio dinamis beresolusi tinggi tanpa batasan paywall</p>

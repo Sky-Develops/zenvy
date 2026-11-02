@@ -27,19 +27,19 @@ export const Navbar = () => {
   const navLinkClass = ({ isActive }) =>
     `flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
       isActive
-        ? 'bg-zenvy-violet/15 text-zenvy-violetLight border border-zenvy-violet/30 shadow-sm'
+        ? 'bg-zenvy-card text-white border border-zenvy-border shadow-sm'
         : 'text-zinc-400 hover:text-white hover:bg-zenvy-card'
     }`;
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-zenvy-dark/80 backdrop-blur-md border-b border-zenvy-border">
+    <header className="sticky top-0 z-40 w-full bg-[#101014] border-b border-zenvy-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
           {/* Logo Brand */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zenvy-violet to-zenvy-violetDark flex items-center justify-center shadow-lg shadow-zenvy-violet/25 group-hover:scale-105 transition-transform duration-200">
-              <Radio className="w-5 h-5 text-white animate-pulse-subtle" />
+              <Radio className="w-5 h-5 text-white" />
             </div>
             <div>
               <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zenvy-violetLight bg-clip-text text-transparent">
@@ -72,7 +72,7 @@ export const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zenvy-card border border-zenvy-border">
-                  <div className="w-6 h-6 rounded-full bg-zenvy-violet/20 text-zenvy-violet flex items-center justify-center text-xs font-bold">
+                  <div className="w-6 h-6 rounded-full bg-zenvy-cardElevated text-zinc-300 flex items-center justify-center text-xs font-bold">
                     {user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">
@@ -122,7 +122,7 @@ export const Navbar = () => {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-zenvy-border bg-zenvy-dark/95 backdrop-blur-xl px-4 pt-3 pb-5 space-y-2">
+        <div className="md:hidden border-t border-zenvy-border bg-[#101014] px-4 pt-3 pb-5 space-y-2">
           <NavLink
             to="/"
             onClick={() => setIsMobileMenuOpen(false)}

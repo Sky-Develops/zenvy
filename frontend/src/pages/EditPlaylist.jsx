@@ -176,7 +176,7 @@ export const EditPlaylist = () => {
 
         <div className="flex items-center gap-3">
           {savedSuccess && (
-            <span className="flex items-center gap-1.5 text-xs text-zenvy-mint font-semibold bg-zenvy-mint/10 px-3 py-1.5 rounded-lg border border-zenvy-mint/20">
+            <span className="flex items-center gap-1.5 text-xs text-zinc-300 font-semibold bg-zenvy-card px-3 py-1.5 rounded-lg border border-zenvy-border">
               <Check className="w-4 h-4" />
               Perubahan Disimpan
             </span>
@@ -269,7 +269,7 @@ export const EditPlaylist = () => {
             <div>
               <label className="block text-xs font-semibold text-zinc-300 mb-1.5 flex items-center justify-between">
                 <span>Penyelarasan Frekuensi Utama</span>
-                <span className="text-[10px] text-zenvy-mint font-mono">Tuning Audio</span>
+                <span className="text-[10px] text-zinc-400 font-mono">Tuning Audio</span>
               </label>
               <select
                 value={frequencyPreset}
@@ -294,7 +294,7 @@ export const EditPlaylist = () => {
                   onClick={() => setIsPublic(true)}
                   className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition ${
                     isPublic
-                      ? 'bg-zenvy-violet/20 border-zenvy-violet text-white'
+                      ? 'bg-purple-900 border-purple-500 text-white'
                       : 'bg-zenvy-obsidian border-zenvy-border text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -307,7 +307,7 @@ export const EditPlaylist = () => {
                   onClick={() => setIsPublic(false)}
                   className={`p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition ${
                     !isPublic
-                      ? 'bg-zenvy-violet/20 border-zenvy-violet text-white'
+                      ? 'bg-purple-900 border-purple-500 text-white'
                       : 'bg-zenvy-obsidian border-zenvy-border text-zinc-400 hover:text-white'
                   }`}
                 >
@@ -418,7 +418,7 @@ export const EditPlaylist = () => {
                             <span>•</span>
                             <span className="font-mono text-zinc-300">{track.musicalKey || 'F# Minor'}</span>
                             <span>•</span>
-                            <span className="font-mono text-zenvy-mint">{track.bpm || 80} BPM</span>
+                            <span className="font-mono text-zinc-400">{track.bpm || 80} BPM</span>
                           </div>
                         </div>
                       </div>
@@ -463,10 +463,10 @@ export const EditPlaylist = () => {
           <div className="p-5 rounded-2xl bg-zenvy-card border border-zenvy-border space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-zenvy-mint" />
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
                 <span>Rekomendasi Lagu Tambahan Cerdas</span>
               </h3>
-              <span className="text-[10px] text-zenvy-mint font-mono">Penyelarasan Harmonik 90%+</span>
+              <span className="text-[10px] text-zinc-400 font-mono">Penyelarasan Harmonik 90%+</span>
             </div>
 
             <div className="space-y-2">

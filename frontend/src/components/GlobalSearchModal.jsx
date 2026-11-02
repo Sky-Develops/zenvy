@@ -123,7 +123,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
                           </span>
                         )}
                         {track.bpm && (
-                          <span className="text-[10px] text-zenvy-mint font-mono font-medium">
+                          <span className="text-[10px] text-zinc-400 font-mono font-medium">
                             {track.bpm} BPM
                           </span>
                         )}
@@ -148,7 +148,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
             <span><kbd className="bg-zenvy-obsidian px-1.5 py-0.5 rounded border border-zenvy-border">↵</kbd> Buka</span>
             <span><kbd className="bg-zenvy-obsidian px-1.5 py-0.5 rounded border border-zenvy-border">Spasi</kbd> Putar/Jeda</span>
           </div>
-          <span className="text-zenvy-mint font-mono">320kbps Lossless</span>
+          <span className="text-zinc-400 font-mono">320kbps Lossless</span>
         </div>
       </div>
     </div>

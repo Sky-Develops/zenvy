@@ -40,7 +40,7 @@ export const MusicCard = ({
   };
 
   return (
-    <div className="group relative bg-zenvy-card hover:bg-zenvy-cardElevated rounded-lg p-3 border border-zenvy-border hover:border-zenvy-border/80 transition-all duration-200 flex flex-col justify-between shadow-lg shadow-black/20">
+    <div className="group relative bg-zenvy-card hover:bg-zenvy-cardElevated rounded-lg p-3 border border-zenvy-border hover:border-zinc-500 transition-all duration-200 flex flex-col justify-between shadow-md">
       
       {/* Thumbnail Container */}
       <div className="relative aspect-video w-full rounded-md overflow-hidden bg-zenvy-obsidian mb-3">
@@ -63,28 +63,28 @@ export const MusicCard = ({
           aria-label={`Play ${music.title}`}
           className={`absolute inset-0 m-auto w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ${
             isCurrentActive && isPlaying
-              ? 'bg-zenvy-violet text-white scale-100 shadow-lg shadow-zenvy-violet/50 ring-2 ring-white/50'
+              ? 'bg-zenvy-violet text-white scale-100 shadow-md ring-2 ring-white/50'
               : 'bg-zenvy-violet text-white opacity-0 group-hover:opacity-100 group-hover:scale-105 hover:bg-purple-600 shadow-md'
           }`}
         >
           <Play className="w-5 h-5 fill-current ml-0.5" />
         </button>
 
-        {/* Momentum & Telemetry badges */}
+        {/* Solid badge (tanpa transparansi neon) */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5">
           {music.momentum && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/70 backdrop-blur-md text-zenvy-mint border border-zenvy-mint/30 flex items-center gap-1">
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/90 text-zinc-300 border border-zinc-700 flex items-center gap-1">
               <Sparkles className="w-2.5 h-2.5" />
               {music.momentum}
             </span>
           )}
         </div>
 
-        {/* Active playback indicator */}
+        {/* Active playback indicator (Statis tanpa kedip) */}
         {isCurrentActive && (
           <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-zenvy-violet text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-            Active
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+            Aktif
           </div>
         )}
       </div>
@@ -103,7 +103,7 @@ export const MusicCard = ({
             {music.channelTitle || 'YouTube Music'}
           </p>
 
-          {/* Sonic DNA pill line */}
+          {/* Sonic DNA pill line (Bersih netral) */}
           <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 mb-3 flex-wrap">
             {music.musicalKey && (
               <span className="px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border font-mono text-zinc-300">
@@ -111,7 +111,7 @@ export const MusicCard = ({
               </span>
             )}
             {music.bpm && (
-              <span className="px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border font-mono text-zenvy-mint">
+              <span className="px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border font-mono text-zinc-300">
                 {music.bpm} BPM
               </span>
             )}
@@ -153,10 +153,10 @@ export const MusicCard = ({
 
           <Link
             to={`/music/${trackId}`}
-            title="Inspect Sonic DNA & Detail"
+            title="Inspect Detail"
             className="inline-flex items-center gap-1 text-[11px] font-medium text-zenvy-muted hover:text-white px-2 py-1 rounded hover:bg-zenvy-cardElevated transition"
           >
-            <span>Sonic DNA</span>
+            <span>Detail</span>
             <ExternalLink className="w-3 h-3" />
           </Link>
         </div>

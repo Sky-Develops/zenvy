@@ -13,8 +13,7 @@ import {
   Repeat, 
   RotateCcw, 
   RotateCw,
-  Heart,
-  Sparkles
+  Heart
 } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 
@@ -58,12 +57,12 @@ export const MusicPlayer = () => {
   };
 
   return (
-    <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar/95 backdrop-blur-2xl border-t border-zenvy-border shadow-2xl transition-all duration-300">
+    <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
       
       {/* Layar Video IFrame YouTube Diperluas */}
       {showVideo && (
         <div className="max-w-4xl mx-auto p-4 border-b border-zenvy-border">
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-2xl border border-zenvy-border">
+          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xl border border-zenvy-border">
             <iframe
               id="youtube-player-iframe"
               title={currentTrack.title}
@@ -81,24 +80,24 @@ export const MusicPlayer = () => {
       {hasError && (
         <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center justify-center gap-2 text-xs text-red-400">
           <AlertCircle className="w-3.5 h-3.5" />
-          <span>Catatan pemutaran: Embed dibatasi hak cipta oleh musisi. Telemetri audio stream tetap aktif.</span>
+          <span>Catatan pemutaran: Embed dibatasi hak cipta YouTube. Audio stream tetap aktif.</span>
         </div>
       )}
 
       {/* Grid 3-Zona Pemutar Audio */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 grid grid-cols-12 items-center gap-4">
         
-        {/* ZONA 1 (Kiri 3 Kolom): Info Lagu & DNA Suara */}
+        {/* ZONA 1 (Kiri 3 Kolom): Info Lagu */}
         <div className="col-span-4 sm:col-span-3 flex items-center gap-3 min-w-0">
-          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-black border border-zenvy-border shadow">
+          <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-black border border-zenvy-border shadow-sm">
             <img
               src={currentTrack.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
               alt={currentTrack.title}
               className="w-full h-full object-cover"
             />
             {isPlaying && (
-              <div className="absolute inset-0 bg-zenvy-violet/30 flex items-center justify-center">
-                <Radio className="w-4 h-4 text-white animate-pulse" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Radio className="w-4 h-4 text-white" />
               </div>
             )}
           </div>
@@ -106,7 +105,7 @@ export const MusicPlayer = () => {
           <div className="min-w-0">
             <Link
               to={`/music/${trackId}`}
-              className="block text-xs sm:text-sm font-semibold text-white hover:text-zenvy-violetSoft truncate"
+              className="block text-xs sm:text-sm font-semibold text-white hover:text-zinc-300 truncate"
             >
               {currentTrack.title}
             </Link>
@@ -117,7 +116,7 @@ export const MusicPlayer = () => {
               <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-zinc-400 mt-0.5">
                 <span className="font-mono text-zinc-300">{currentTrack.musicalKey}</span>
                 <span>•</span>
-                <span className="font-mono text-zenvy-mint">{currentTrack.bpm || 80} BPM</span>
+                <span className="font-mono text-zinc-400">{currentTrack.bpm || 80} BPM</span>
               </div>
             )}
           </div>
@@ -141,7 +140,7 @@ export const MusicPlayer = () => {
             <button
               onClick={() => setIsShuffle(!isShuffle)}
               className={`p-1 rounded text-xs transition ${
-                isShuffle ? 'text-zenvy-violetSoft' : 'text-zinc-400 hover:text-white'
+                isShuffle ? 'text-white' : 'text-zinc-400 hover:text-white'
               }`}
               title="Acak Trek"
             >
@@ -158,7 +157,7 @@ export const MusicPlayer = () => {
 
             <button
               onClick={togglePlay}
-              className="w-9 h-9 rounded-full bg-white text-black hover:scale-105 active:scale-95 flex items-center justify-center shadow-lg transition"
+              className="w-9 h-9 rounded-full bg-white text-black hover:bg-zinc-200 flex items-center justify-center shadow transition"
               aria-label={isPlaying ? 'Jeda' : 'Putar'}
             >
               {isPlaying ? (
@@ -179,7 +178,7 @@ export const MusicPlayer = () => {
             <button
               onClick={() => setIsLoop(!isLoop)}
               className={`p-1 rounded text-xs transition ${
-                isLoop ? 'text-zenvy-violetSoft' : 'text-zinc-400 hover:text-white'
+                isLoop ? 'text-white' : 'text-zinc-400 hover:text-white'
               }`}
               title="Ulangi Lagu"
             >
@@ -196,18 +195,17 @@ export const MusicPlayer = () => {
               max={duration || 100}
               value={currentTime}
               onChange={handleSeek}
-              className="w-full h-1 bg-zenvy-border rounded-lg appearance-none cursor-pointer accent-zenvy-violet hover:accent-white transition"
+              className="w-full h-1 bg-zenvy-border rounded-lg appearance-none cursor-pointer accent-white hover:accent-zinc-300 transition"
             />
             <span>{formatTime(duration)}</span>
           </div>
         </div>
 
-        {/* ZONA 3 (Kanan 3 Kolom): Lencana Bitrate, Volume & Layar Video */}
+        {/* ZONA 3 (Kanan 3 Kolom): Solid Badge, Layar Video & Volume */}
         <div className="col-span-3 flex items-center justify-end gap-2.5">
           
-          {/* Lencana Bitrate 320k OPUS */}
-          <span className="hidden xl:inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-zenvy-mint/10 text-zenvy-mint border border-zenvy-mint/20">
-            <Sparkles className="w-2.5 h-2.5" />
+          {/* Lencana Solid (Tanpa transparansi neon) */}
+          <span className="hidden xl:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zenvy-card text-zinc-300 border border-zenvy-border">
             320k OPUS
           </span>
 
@@ -216,7 +214,7 @@ export const MusicPlayer = () => {
             onClick={() => setShowVideo(!showVideo)}
             className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition ${
               showVideo
-                ? 'bg-zenvy-violet/20 border-zenvy-violet text-zenvy-violetSoft'
+                ? 'bg-zenvy-cardElevated border-zinc-500 text-white'
                 : 'bg-zenvy-card border-zenvy-border text-zinc-400 hover:text-white'
             }`}
             title={showVideo ? 'Sembunyikan Layar Video' : 'Buka Layar Video YouTube'}

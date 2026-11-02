@@ -16,7 +16,7 @@ export default {
           border: '#30303A',       // Structural Borders
           violet: '#8B5CF6',       // Vibrant Electric Violet
           violetSoft: '#A78BFA',   // Soft Lilac Violet
-          mint: '#34D399',         // Neon Mint (Telemetry highlight)
+          mint: '#A1A1AA',         // Neutral text tone
           text: '#FFFFFF',         // Primary Typography
           muted: '#A1A1AA',        // Secondary Muted Text
         }

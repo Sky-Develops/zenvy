@@ -56,10 +56,10 @@ export const Register = () => {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-zenvy-dark/90 rounded-3xl p-8 border border-zenvy-border shadow-2xl relative overflow-hidden backdrop-blur-xl">
+      <div className="w-full max-w-md bg-zenvy-card rounded-2xl p-8 border border-zenvy-border shadow-2xl relative overflow-hidden">
         
         {/* Glow accent */}
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-zenvy-violet/20 rounded-full blur-3xl pointer-events-none" />
+
 
         {/* Brand header */}
         <div className="text-center mb-8">

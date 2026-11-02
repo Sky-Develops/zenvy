@@ -9,8 +9,8 @@ export const EmptyState = ({
   onAction,
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center p-12 text-center bg-zenvy-card/40 rounded-2xl border border-zenvy-border/60 max-w-lg mx-auto my-8">
-      <div className="w-16 h-16 rounded-full bg-zenvy-violet/10 border border-zenvy-violet/30 flex items-center justify-center text-zenvy-violet mb-4 shadow-lg shadow-zenvy-violet/5">
+    <div className="flex flex-col items-center justify-center p-12 text-center bg-zenvy-card rounded-2xl border border-zenvy-border max-w-lg mx-auto my-8">
+      <div className="w-16 h-16 rounded-full bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-center text-zinc-300 mb-4">
         <Icon className="w-8 h-8" />
       </div>
       <h3 className="text-xl font-bold text-white mb-2">{title}</h3>

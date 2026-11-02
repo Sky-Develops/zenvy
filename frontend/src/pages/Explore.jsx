@@ -75,7 +75,7 @@ export const Explore = () => {
       
       {/* Header Jelajahi */}
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zenvy-cardElevated border border-zenvy-border text-xs text-zenvy-mint font-medium">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zenvy-card border border-zenvy-border text-xs text-zinc-300 font-medium">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Radar Penemuan Global Aktif</span>
         </div>
@@ -122,7 +122,7 @@ export const Explore = () => {
               className="group relative rounded-xl p-5 bg-zenvy-card hover:bg-zenvy-cardElevated border border-zenvy-border cursor-pointer transition-all duration-200 shadow-lg flex flex-col justify-between h-40"
             >
               <div>
-                <span className="text-[10px] font-bold text-zenvy-mint uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
                   {hab.activeListeners}
                 </span>
                 <h3 className="text-base font-bold text-white mt-1 group-hover:text-zenvy-violetSoft transition">

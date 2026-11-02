@@ -125,7 +125,7 @@ export const MusicDetail = () => {
             onClick={handleShare}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zenvy-card border border-zenvy-border text-zinc-300 hover:text-white transition"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-zenvy-mint" /> : <Share2 className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-zinc-300" /> : <Share2 className="w-3.5 h-3.5" />}
             <span>{copied ? 'Tautan Disalin' : 'Bagikan'}</span>
           </button>
         </div>
@@ -146,7 +146,7 @@ export const MusicDetail = () => {
             <span className="px-2 py-0.5 rounded bg-zenvy-violet text-white text-[10px] font-bold uppercase tracking-wider">
               {track.habitat || 'Suasana Suara'}
             </span>
-            <span className="px-2 py-0.5 rounded bg-zenvy-mint/10 text-zenvy-mint border border-zenvy-mint/20 text-[10px] font-mono font-semibold">
+            <span className="px-2 py-0.5 rounded bg-zenvy-card text-zinc-300 border border-zenvy-border text-[10px] font-mono font-semibold">
               320kbps OPUS
             </span>
             {track.momentum && (
@@ -238,10 +238,10 @@ export const MusicDetail = () => {
           <div className="bg-zenvy-card rounded-xl p-5 border border-zenvy-border space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-zenvy-border">
               <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-zenvy-mint" />
+                <Activity className="w-4 h-4 text-purple-400" />
                 <span>Data DNA Musikal Trek</span>
               </h3>
-              <span className="text-[10px] text-zenvy-mint font-mono font-semibold">98.4 kHz Langsung</span>
+              <span className="text-[10px] text-zinc-400 font-mono font-semibold">98.4 kHz Langsung</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
@@ -268,7 +268,7 @@ export const MusicDetail = () => {
 
               <div className="p-3 rounded-lg bg-zenvy-obsidian border border-zenvy-border">
                 <span className="text-[10px] text-zenvy-muted uppercase font-bold">Codec Audio</span>
-                <p className="text-sm font-bold text-zenvy-mint font-mono mt-0.5">
+                <p className="text-sm font-bold text-zinc-300 font-mono mt-0.5">
                   320k OPUS
                 </p>
               </div>
@@ -310,7 +310,7 @@ export const MusicDetail = () => {
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zenvy-mint/10 text-zenvy-mint border border-zenvy-mint/20 whitespace-nowrap">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zenvy-card text-zinc-300 border border-zenvy-border whitespace-nowrap">
                       {sim.harmonicMatch || 94}% cocok
                     </span>
                   </div>

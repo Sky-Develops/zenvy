@@ -99,7 +99,7 @@ export const Playlists = () => {
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-purple-900/30 via-zenvy-card to-zenvy-obsidian border border-zenvy-border">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-zenvy-violet/20 border border-zenvy-violet/40 flex items-center justify-center text-zenvy-violetSoft shadow-lg shadow-zenvy-violet/20">
+          <div className="w-14 h-14 rounded-xl bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-center text-zinc-300 shadow-lg">
             <ListMusic className="w-7 h-7" />
           </div>
           <div>
@@ -184,7 +184,7 @@ export const Playlists = () => {
                     />
                     <div>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-[10px] font-bold text-zenvy-mint uppercase px-2 py-0.5 rounded bg-zenvy-mint/10 border border-zenvy-mint/20">
+                        <span className="text-[10px] font-bold text-zinc-300 uppercase px-2 py-0.5 rounded bg-zenvy-card border border-zenvy-border">
                           {selectedPlaylist.frequencyPreset || '432 Hz Resonansi'}
                         </span>
                         <span className="text-[10px] text-zinc-400 flex items-center gap-1">
@@ -255,7 +255,7 @@ export const Playlists = () => {
                                 <span>•</span>
                                 <span className="font-mono text-zinc-400">{track.musicalKey || 'F# Minor'}</span>
                                 <span>•</span>
-                                <span className="font-mono text-zenvy-mint">{track.bpm || 80} BPM</span>
+                                <span className="font-mono text-zinc-400">{track.bpm || 80} BPM</span>
                               </div>
                             </div>
                           </div>

@@ -111,7 +111,7 @@ export const AddToPlaylistModal = ({ isOpen, onClose, music }) => {
           ) : (
             <button
               onClick={() => setIsCreating(true)}
-              className="w-full py-2.5 px-3 rounded-lg border border-dashed border-zenvy-violet/40 hover:border-zenvy-violet bg-zenvy-violet/5 hover:bg-zenvy-violet/10 text-xs font-semibold text-zenvy-violetSoft flex items-center justify-center gap-2 transition"
+              className="w-full py-2.5 px-3 rounded-lg border border-zenvy-border hover:border-zinc-500 bg-zenvy-card hover:bg-zenvy-cardElevated text-xs font-semibold text-zinc-200 flex items-center justify-center gap-2 transition"
             >
               <Plus className="w-4 h-4" />
               <span>Buat Playlist Baru</span>
@@ -144,7 +144,7 @@ export const AddToPlaylistModal = ({ isOpen, onClose, music }) => {
                       disabled={isAdded}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition ${
                         isAdded
-                          ? 'bg-zenvy-mint/20 text-zenvy-mint border border-zenvy-mint/30 cursor-default'
+                          ? 'bg-zinc-800 text-zinc-300 border border-zinc-700 cursor-default'
                           : 'bg-zenvy-violet text-white hover:bg-purple-700'
                       }`}
                     >
