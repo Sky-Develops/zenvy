@@ -41,7 +41,7 @@ export const Search = () => {
 
   useEffect(() => {
     executeSearch(query);
-  }, [activeTab]);
+  }, [query, activeTab]);
 
   const executeSearch = async (val) => {
     setLoading(true);

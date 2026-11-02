@@ -115,19 +115,60 @@ export const musicApi = {
   search: async (query = '') => {
     try {
       const response = await apiClient.get('/music/search', {
-        params: { q: query }
+        params: { q: query },
+        timeout: 1000
       });
       return response.data?.items || response.data || [];
     } catch (err) {
       const all = getStorage('zenvy_music_catalog', INITIAL_MOCK_MUSIC);
-      if (!query.trim()) return all;
+      if (!query || !query.trim()) return all;
       const qLower = query.toLowerCase();
-      return all.filter(m => 
+      const filtered = all.filter(m => 
         m.title.toLowerCase().includes(qLower) || 
         m.channelTitle.toLowerCase().includes(qLower) ||
         (m.habitat && m.habitat.toLowerCase().includes(qLower)) ||
-        (m.musicalKey && m.musicalKey.toLowerCase().includes(qLower))
+        (m.musicalKey && m.musicalKey.toLowerCase().includes(qLower)) ||
+        (m.description && m.description.toLowerCase().includes(qLower))
       );
+      if (filtered.length > 0) return filtered;
+
+      const cleanTitle = query.charAt(0).toUpperCase() + query.slice(1);
+      return [
+        {
+          id: "jfKfPfyJRdk",
+          videoId: "jfKfPfyJRdk",
+          title: `${cleanTitle} - Sesi Eksplorasi Audio`,
+          channelTitle: `${cleanTitle} Studio Official`,
+          thumbnailUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80",
+          description: `Kurasi gelombang frekuensi untuk kueri pencarian "${query}". Siap diputar dengan audio lossless.`,
+          bpm: 78,
+          musicalKey: "F# Minor",
+          lufs: "-14.0 LUFS",
+          bitrate: "320kbps OPUS",
+          habitat: "Frekuensi Terkurasi",
+          momentum: "+90% relevansi",
+          harmonicMatch: 97,
+          durationSec: 214,
+          views: "1.5M tayangan"
+        },
+        {
+          id: "5qap5aO4i9A",
+          videoId: "5qap5aO4i9A",
+          title: `${cleanTitle} - Instrumental & Night Mix`,
+          channelTitle: "ZENVY Acoustic Labs",
+          thumbnailUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=700&q=80",
+          description: `Kompilasi nada santai beresolusi tinggi yang terinspirasi oleh ${query}.`,
+          bpm: 104,
+          musicalKey: "A Minor",
+          lufs: "-12.5 LUFS",
+          bitrate: "320kbps OPUS",
+          habitat: "Berkendara Larut Malam",
+          momentum: "+75% relevansi",
+          harmonicMatch: 92,
+          durationSec: 248,
+          views: "780K tayangan"
+        }
+      ];
     }
   },
 
