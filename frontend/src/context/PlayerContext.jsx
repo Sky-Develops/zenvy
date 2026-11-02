@@ -15,6 +15,15 @@ export const PlayerProvider = ({ children }) => {
 
   // Play track and open player
   const playTrack = (track) => {
+    const newId = track?.videoId || track?.id;
+    const currentId = currentTrack?.videoId || currentTrack?.id;
+
+    if (currentId && newId && currentId === newId) {
+      setIsPlaying(true);
+      setIsPlayerOpen(true);
+      return;
+    }
+
     setCurrentTrack(track);
     setIsPlaying(true);
     setIsPlayerOpen(true);

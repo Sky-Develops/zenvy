@@ -20,11 +20,20 @@ import { usePlayer } from '../context/PlayerContext';
 import { favoritesApi } from '../services/api';
 import AddToPlaylistModal from './AddToPlaylistModal';
 
+// Formatter waktu akurat (mendukung detik, menit, jam)
 const formatTime = (secs) => {
-  if (!secs || isNaN(secs) || secs < 0) return '0:00';
-  const m = Math.floor(secs / 60);
-  const s = Math.floor(secs % 60);
-  return `${m}:${s < 10 ? '0' : ''}${s}`;
+  if (secs === null || secs === undefined || isNaN(secs) || secs < 0) return '0:00';
+  const total = Math.floor(secs);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  const padSec = seconds < 10 ? `0${seconds}` : `${seconds}`;
+
+  if (hours > 0) {
+    const padMin = minutes < 10 ? `0${minutes}` : `${minutes}`;
+    return `${hours}:${padMin}:${padSec}`;
+  }
+  return `${minutes}:${padSec}`;
 };
 
 export const MusicPlayer = () => {
@@ -45,8 +54,6 @@ export const MusicPlayer = () => {
     setIsLoop,
     setVolume,
     setIsMuted,
-    toggleMute,
-    togglePlay, 
     closePlayer 
   } = usePlayer();
 
@@ -54,14 +61,42 @@ export const MusicPlayer = () => {
   const [hasError, setHasError] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [modalMusic, setModalMusic] = useState(null);
+  const [scrubTime, setScrubTime] = useState(null);
 
+  const iframeRef = useRef(null);
   const playerRef = useRef(null);
   const isScrubbingRef = useRef(false);
+  const isLoopRef = useRef(isLoop);
+  const prevIsPlayingRef = useRef(isPlaying);
+  const prevTrackIdRef = useRef(null);
+
+  useEffect(() => {
+    isLoopRef.current = isLoop;
+  }, [isLoop]);
 
   const trackId = currentTrack?.videoId || currentTrack?.id;
 
-  // 1. Muat YouTube Iframe API script sekali
+  // Helper untuk mengirim perintah postMessage langsung ke iframe YouTube
+  const sendYTCommand = (func, args = []) => {
+    const iframe = iframeRef.current || document.getElementById('zenvy-youtube-player-iframe');
+    if (iframe && iframe.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage(
+          JSON.stringify({
+            event: 'command',
+            func: func,
+            args: args,
+          }),
+          '*'
+        );
+      } catch {}
+    }
+  };
+
+  // 1. Muat skrip YouTube Iframe API satu kali secara aman
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.id = 'youtube-iframe-api';
@@ -72,21 +107,27 @@ export const MusicPlayer = () => {
       } else {
         document.head.appendChild(tag);
       }
+      window.onYouTubeIframeAPIReady = () => {
+        setupYTPlayer();
+      };
+    } else if (window.YT && window.YT.Player) {
+      setupYTPlayer();
     }
   }, []);
 
-  // 2. Setup YouTube Player Instance
+  // 2. Setup YouTube Player Instance (Layer 2 untuk kontrol mendalam)
   const setupYTPlayer = () => {
-    if (!window.YT || !window.YT.Player) return;
-    const iframeEl = document.getElementById('zenvy-youtube-player-iframe');
+    if (typeof window === 'undefined' || !window.YT || !window.YT.Player) return;
+    const iframeEl = iframeRef.current || document.getElementById('zenvy-youtube-player-iframe');
     if (!iframeEl) return;
 
     try {
       if (playerRef.current) {
         try { playerRef.current.destroy(); } catch {}
+        playerRef.current = null;
       }
 
-      playerRef.current = new window.YT.Player('zenvy-youtube-player-iframe', {
+      playerRef.current = new window.YT.Player(iframeEl, {
         events: {
           onReady: (event) => {
             try {
@@ -97,22 +138,21 @@ export const MusicPlayer = () => {
               if (typeof dur === 'number' && dur > 0) {
                 setDuration(Math.floor(dur));
               }
-            } catch (err) {
-              console.warn('onReady notice:', err);
-            }
+            } catch {}
           },
           onStateChange: (event) => {
-            // YT.PlayerState: 1 = PLAYING, 2 = PAUSED, 0 = ENDED
-            if (event.data === 1) {
+            if (event.data === 1) { // PLAYING
               setIsPlaying(true);
-              const dur = event.target.getDuration();
-              if (typeof dur === 'number' && dur > 0) {
-                setDuration(Math.floor(dur));
-              }
-            } else if (event.data === 2) {
+              try {
+                const dur = event.target.getDuration();
+                if (typeof dur === 'number' && dur > 0) {
+                  setDuration(Math.floor(dur));
+                }
+              } catch {}
+            } else if (event.data === 2) { // PAUSED
               setIsPlaying(false);
-            } else if (event.data === 0) {
-              if (isLoop) {
+            } else if (event.data === 0) { // ENDED
+              if (isLoopRef.current) {
                 event.target.seekTo(0, true);
                 event.target.playVideo();
               } else {
@@ -127,61 +167,134 @@ export const MusicPlayer = () => {
         }
       });
     } catch (e) {
-      console.warn('YT player initialization error:', e);
+      console.warn('YT player initialization notice:', e);
     }
   };
 
-  // 3. Re-bind / Load Video saat trackId berganti
+  // 3. Listener HTML5 postMessage YouTube Telemetry (Zero-lag, 100% Real-time)
+  useEffect(() => {
+    const handleWindowMessage = (e) => {
+      try {
+        let data = e.data;
+        if (typeof data === 'string') {
+          data = JSON.parse(data);
+        }
+        if (!data || typeof data !== 'object') return;
+
+        // Telemetri infoDelivery: YouTube mengirim currentTime dan duration secara periodik
+        if (data.event === 'infoDelivery' && data.info) {
+          const { currentTime: ytTime, duration: ytDur, playerState: ytState } = data.info;
+
+          if (typeof ytDur === 'number' && !isNaN(ytDur) && ytDur > 0) {
+            setDuration(Math.floor(ytDur));
+          }
+
+          if (typeof ytTime === 'number' && !isNaN(ytTime) && !isScrubbingRef.current) {
+            setCurrentTime(Math.floor(ytTime));
+          }
+
+          if (ytState === 1) {
+            setIsPlaying(true);
+          } else if (ytState === 2) {
+            setIsPlaying(false);
+          } else if (ytState === 0) {
+            if (isLoopRef.current) {
+              sendYTCommand('seekTo', [0, true]);
+              sendYTCommand('playVideo');
+            } else {
+              setIsPlaying(false);
+              setCurrentTime(0);
+            }
+          }
+        }
+
+        // Perubahan status pemutar YouTube
+        if (data.event === 'onStateChange') {
+          const state = data.info;
+          if (state === 1) {
+            setIsPlaying(true);
+          } else if (state === 2) {
+            setIsPlaying(false);
+          } else if (state === 0) {
+            if (isLoopRef.current) {
+              sendYTCommand('seekTo', [0, true]);
+              sendYTCommand('playVideo');
+            } else {
+              setIsPlaying(false);
+              setCurrentTime(0);
+            }
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener('message', handleWindowMessage);
+    return () => window.removeEventListener('message', handleWindowMessage);
+  }, []);
+
+  // 4. Sinkronisasi perubahan lagu (trackId) tanpa merusak DOM iframe
   useEffect(() => {
     if (!isPlayerOpen || !trackId) return;
     setHasError(false);
-    setCurrentTime(0);
 
-    if (window.YT && window.YT.Player) {
+    if (prevTrackIdRef.current && prevTrackIdRef.current !== trackId) {
+      setCurrentTime(0);
+      setIsPlaying(true);
+      sendYTCommand('loadVideoById', [trackId]);
       if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
         try {
           playerRef.current.loadVideoById(trackId);
-          playerRef.current.playVideo();
-          setIsPlaying(true);
-          return;
-        } catch {
-          // fallback to full setup
-        }
+        } catch {}
       }
-      setupYTPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = () => {
-        setupYTPlayer();
-      };
     }
+    prevTrackIdRef.current = trackId;
   }, [trackId, isPlayerOpen]);
 
-  // 4. Sinkronisasi Waktu Nyata dari Video YouTube ke Slider (Setiap 350ms)
+  // 5. Sinkronisasi Play / Pause dari context ke YouTube
   useEffect(() => {
-    let interval = null;
-    if (isPlaying && isPlayerOpen) {
-      interval = setInterval(() => {
-        if (isScrubbingRef.current) return;
-        if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-          try {
-            const cur = playerRef.current.getCurrentTime();
-            const dur = playerRef.current.getDuration();
-            if (typeof cur === 'number' && !isNaN(cur)) {
-              setCurrentTime(Math.floor(cur));
-            }
-            if (typeof dur === 'number' && !isNaN(dur) && dur > 0) {
-              setDuration(Math.floor(dur));
-            }
-          } catch {
-            // ignore
-          }
+    if (prevIsPlayingRef.current !== isPlaying) {
+      if (isPlaying) {
+        sendYTCommand('playVideo');
+        if (playerRef.current?.playVideo) {
+          try { playerRef.current.playVideo(); } catch {}
         }
-      }, 350);
+      } else {
+        sendYTCommand('pauseVideo');
+        if (playerRef.current?.pauseVideo) {
+          try { playerRef.current.pauseVideo(); } catch {}
+        }
+      }
+      prevIsPlayingRef.current = isPlaying;
     }
+  }, [isPlaying]);
+
+  // 6. Polling cadangan (Heartbeat 400ms) untuk memastikan telemetry tetap aktif
+  useEffect(() => {
+    if (!isPlaying || !isPlayerOpen) return;
+
+    const interval = setInterval(() => {
+      if (isScrubbingRef.current) return;
+
+      sendYTCommand('listening');
+
+      if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
+        try {
+          const cur = playerRef.current.getCurrentTime();
+          const dur = playerRef.current.getDuration();
+          if (typeof cur === 'number' && !isNaN(cur) && cur >= 0) {
+            setCurrentTime(Math.floor(cur));
+          }
+          if (typeof dur === 'number' && !isNaN(dur) && dur > 0) {
+            setDuration(Math.floor(dur));
+          }
+        } catch {}
+      }
+    }, 400);
+
     return () => clearInterval(interval);
   }, [isPlaying, isPlayerOpen]);
 
-  // 5. Sinkronisasi Favorit Persisten
+  // 7. Sinkronisasi Lagu Favorit
   useEffect(() => {
     let isMounted = true;
     const syncFav = async () => {
@@ -195,9 +308,7 @@ export const MusicPlayer = () => {
         if (isMounted) {
           setIsFav(list.some(f => (f.videoId || f.id) === tid));
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
     };
     syncFav();
     return () => { isMounted = false; };
@@ -219,125 +330,160 @@ export const MusicPlayer = () => {
     }
   };
 
-  // 6. Tombol Play / Pause yang Terikat Langsung ke Video
+  // 8. Kontrol Tombol Play / Pause Utama
   const handleTogglePlay = () => {
-    if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
-      try {
-        const state = playerRef.current.getPlayerState();
-        if (state === 1) { // Sedang berputar
-          playerRef.current.pauseVideo();
-          setIsPlaying(false);
-        } else {
-          playerRef.current.playVideo();
-          setIsPlaying(true);
-        }
-        return;
-      } catch {}
+    if (isPlaying) {
+      setIsPlaying(false);
+      sendYTCommand('pauseVideo');
+      if (playerRef.current?.pauseVideo) {
+        try { playerRef.current.pauseVideo(); } catch {}
+      }
+    } else {
+      setIsPlaying(true);
+      sendYTCommand('playVideo');
+      if (playerRef.current?.playVideo) {
+        try { playerRef.current.playVideo(); } catch {}
+      }
     }
-    togglePlay();
   };
 
-  // 7. Tombol Mundur 10 Detik Terikat ke Video
+  // 9. Tombol Mundur 10 Detik
   const handleRewind10 = () => {
-    let cur = currentTime;
-    if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-      try { cur = playerRef.current.getCurrentTime(); } catch {}
-    }
-    const target = Math.max(0, Math.floor(cur) - 10);
+    const cur = scrubTime !== null ? scrubTime : currentTime;
+    const target = Math.max(0, cur - 10);
     setCurrentTime(target);
-    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+    sendYTCommand('seekTo', [target, true]);
+    if (playerRef.current?.seekTo) {
       try { playerRef.current.seekTo(target, true); } catch {}
     }
   };
 
-  // 8. Tombol Maju 10 Detik Terikat ke Video
+  // 10. Tombol Maju 10 Detik
   const handleForward10 = () => {
-    let cur = currentTime;
-    let dur = duration;
-    if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
-      try { 
-        cur = playerRef.current.getCurrentTime();
-        dur = playerRef.current.getDuration();
-      } catch {}
-    }
-    const target = Math.min(dur || cur + 10, Math.floor(cur) + 10);
+    const cur = scrubTime !== null ? scrubTime : currentTime;
+    const maxDur = duration > 0 ? duration : (cur + 10);
+    const target = Math.min(maxDur, cur + 10);
     setCurrentTime(target);
-    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+    sendYTCommand('seekTo', [target, true]);
+    if (playerRef.current?.seekTo) {
       try { playerRef.current.seekTo(target, true); } catch {}
     }
   };
 
-  // 9. Slider Seeking yang Mengontrol Posisi Video
-  const handleSeekChange = (e) => {
-    const val = Number(e.target.value);
-    setCurrentTime(val);
-  };
-
-  const handleSeekCommit = (e) => {
-    isScrubbingRef.current = false;
-    const val = Number(e.target.value);
-    setCurrentTime(val);
-    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
-      try { playerRef.current.seekTo(val, true); } catch {}
-    }
-  };
-
-  const handleSeekStart = () => {
+  // 11. Scrubber / Slider Handler Anti-Macet & Anti-Jumping
+  const handleSeekStart = (e) => {
     isScrubbingRef.current = true;
+    const val = Number(e.target.value);
+    setScrubTime(val);
+
+    const handlePointerUp = () => {
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('touchend', handlePointerUp);
+      window.removeEventListener('mouseup', handlePointerUp);
+
+      setScrubTime((latestScrub) => {
+        const commitTarget = latestScrub !== null ? latestScrub : currentTime;
+        setCurrentTime(commitTarget);
+        sendYTCommand('seekTo', [commitTarget, true]);
+        if (playerRef.current?.seekTo) {
+          try { playerRef.current.seekTo(commitTarget, true); } catch {}
+        }
+        setTimeout(() => {
+          isScrubbingRef.current = false;
+        }, 300);
+        return null;
+      });
+    };
+
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('touchend', handlePointerUp);
+    window.addEventListener('mouseup', handlePointerUp);
   };
 
-  // 10. Kontrol Volume & Mute Terikat ke Video
+  const handleSeekChange = (e) => {
+    setScrubTime(Number(e.target.value));
+  };
+
+  // 12. Kontrol Volume & Mute
   const handleVolumeChange = (e) => {
     const val = Number(e.target.value);
     setVolume(val);
-    if (playerRef.current && typeof playerRef.current.setVolume === 'function') {
-      try {
-        if (val === 0) {
-          playerRef.current.mute();
-          setIsMuted(true);
-        } else {
+    if (val === 0) {
+      setIsMuted(true);
+      sendYTCommand('mute');
+      if (playerRef.current?.mute) {
+        try { playerRef.current.mute(); } catch {}
+      }
+    } else {
+      setIsMuted(false);
+      sendYTCommand('unMute');
+      sendYTCommand('setVolume', [val]);
+      if (playerRef.current?.setVolume) {
+        try {
           playerRef.current.unMute();
           playerRef.current.setVolume(val);
-          setIsMuted(false);
-        }
-      } catch {}
+        } catch {}
+      }
     }
   };
 
   const handleToggleMute = () => {
-    if (playerRef.current) {
-      try {
-        if (isMuted) {
+    if (isMuted) {
+      setIsMuted(false);
+      sendYTCommand('unMute');
+      sendYTCommand('setVolume', [volume || 80]);
+      if (playerRef.current) {
+        try {
           playerRef.current.unMute();
           playerRef.current.setVolume(volume || 80);
-          setIsMuted(false);
-        } else {
-          playerRef.current.mute();
-          setIsMuted(true);
-        }
-        return;
-      } catch {}
+        } catch {}
+      }
+    } else {
+      setIsMuted(true);
+      sendYTCommand('mute');
+      if (playerRef.current) {
+        try { playerRef.current.mute(); } catch {}
+      }
     }
-    toggleMute();
+  };
+
+  const handleIframeLoad = () => {
+    sendYTCommand('listening');
+    sendYTCommand('setVolume', [volume]);
+    if (isMuted) {
+      sendYTCommand('mute');
+    } else {
+      sendYTCommand('unMute');
+    }
+    if (isPlaying) {
+      sendYTCommand('playVideo');
+    }
+    setupYTPlayer();
   };
 
   if (!isPlayerOpen || !currentTrack) return null;
+
+  const displayTime = scrubTime !== null ? scrubTime : currentTime;
+  const maxTime = duration > 0 ? duration : 100;
+  const originParam = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
+  const iframeSrc = `https://www.youtube-nocookie.com/embed/${trackId}?enablejsapi=1&autoplay=1&playsinline=1&controls=1&origin=${originParam}`;
 
   return (
     <>
       <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
         
-        {/* Layar Video & Audio Player IFrame YouTube Terikat */}
+        {/* Layar Video & Audio Player IFrame YouTube Terikat Permanen */}
         <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-zenvy-border block" : "fixed -bottom-[9999px] -right-[9999px] w-[320px] h-[180px] pointer-events-none"}>
           <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xl border border-zenvy-border">
             <iframe
+              ref={iframeRef}
               id="zenvy-youtube-player-iframe"
-              key={trackId}
               title={currentTrack.title}
-              src={`https://www.youtube-nocookie.com/embed/${trackId}?enablejsapi=1&autoplay=1&playsinline=1&controls=1`}
+              src={iframeSrc}
               className="w-full h-full border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              onLoad={handleIframeLoad}
             />
           </div>
         </div>
@@ -463,22 +609,21 @@ export const MusicPlayer = () => {
               </button>
             </div>
 
-            {/* Time Scrubber Bar Terikat ke Video */}
+            {/* Time Scrubber Bar Terikat ke Video (Anti-Macet & Anti-Jumping) */}
             <div className="w-full max-w-lg flex items-center gap-2 text-[11px] font-mono text-zinc-400">
-              <span className="w-9 text-right">{formatTime(currentTime)}</span>
+              <span className="w-10 text-right">{formatTime(displayTime)}</span>
               <input
                 type="range"
                 min="0"
-                max={duration > 0 ? duration : 100}
-                value={currentTime}
-                onMouseDown={handleSeekStart}
+                max={maxTime}
+                value={Math.min(displayTime, maxTime)}
+                onPointerDown={handleSeekStart}
                 onTouchStart={handleSeekStart}
+                onMouseDown={handleSeekStart}
                 onChange={handleSeekChange}
-                onMouseUp={handleSeekCommit}
-                onTouchEnd={handleSeekCommit}
                 className="w-full h-1 bg-zenvy-border rounded-lg appearance-none cursor-pointer accent-white hover:accent-zinc-300 transition"
               />
-              <span className="w-9 text-left">{formatTime(duration)}</span>
+              <span className="w-10 text-left">{formatTime(duration)}</span>
             </div>
           </div>
 
