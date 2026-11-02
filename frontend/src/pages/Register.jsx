@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Radio, Mail, Lock, User, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ZenvyLogo from '../components/ZenvyLogo';
 
 export const Register = () => {
   const [username, setUsername] = useState('');
@@ -63,9 +64,10 @@ export const Register = () => {
 
         {/* Brand header */}
         <div className="text-center mb-8">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-zenvy-violet to-zenvy-violetDark items-center justify-center shadow-lg shadow-zenvy-violet/30 mb-3">
-            <Radio className="w-7 h-7 text-white" />
+          <div className="h-12 w-44 mx-auto mb-3">
+            <ZenvyLogo idPrefix="register" />
           </div>
+
           <h1 className="text-2xl font-bold text-white tracking-tight">Create an Account</h1>
           <p className="text-sm text-zenvy-muted mt-1">Start curating your unique frequency</p>
         </div>

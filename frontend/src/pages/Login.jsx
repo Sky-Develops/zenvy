@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Radio, Mail, Lock, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ZenvyLogo from '../components/ZenvyLogo';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
@@ -47,9 +48,10 @@ export const Login = () => {
 
         {/* Brand header */}
         <div className="text-center mb-8">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-br from-zenvy-violet to-zenvy-violetDark items-center justify-center shadow-lg shadow-zenvy-violet/30 mb-3">
-            <Radio className="w-7 h-7 text-white" />
+          {/* logo */}<div className="h-12 w-44 mx-auto mb-3">
+            <ZenvyLogo idPrefix="login" />
           </div>
+
           <h1 className="text-2xl font-bold text-white tracking-tight">Welcome Back</h1>
           <p className="text-sm text-zenvy-muted mt-1">Tune into your personal sound wave</p>
         </div>

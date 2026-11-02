@@ -1,13 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="100%" height="100%">
   <defs>
-    <linearGradient id="zenvyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#A78BFA" />
-      <stop offset="100%" stop-color="#7C3AED" />
+    <!-- Gradasi ungu sesuai key visual ikon ZENVY -->
+    <linearGradient id="zenvyPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8E54E9" />
+      <stop offset="100%" stop-color="#4776E6" />
     </linearGradient>
-  </defs>
-  <rect width="100" height="100" rx="24" fill="#0F1016"/>
-  <path d="M25 32H75L35 68H75" stroke="url(#zenvyGrad)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="28" cy="68" r="4.5" fill="#A78BFA"/>
-  <circle cx="72" cy="32" r="4.5" fill="#7C3AED"/>
-</svg>
 
+    <!-- Opsi gradasi solid deep-purple alternatif -->
+    <linearGradient id="zenvyVibrant" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9d4edd" />
+      <stop offset="100%" stop-color="#6a0dad" />
+    </linearGradient>
+
+    <!-- Subtle drop glow khas logo aplikasi -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#7b2cbf" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <g filter="url(#softGlow)">
+    <text x="50%" y="58%" text-anchor="middle" dominant-baseline="central" fill="url(#zenvyPurple)" font-family="system-ui, -apple-system, &#39;Inter&#39;, &#39;Montserrat&#39;, &#39;Segoe UI&#39;, Roboto, sans-serif" font-size="115" font-weight="900" font-style="normal" letter-spacing="4">
+      ZENVY
+    </text>
+  </g>
+</svg>

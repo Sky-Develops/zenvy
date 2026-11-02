@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { SONIC_HABITATS } from '../services/mockData';
 import { playlistApi } from '../services/api';
+import ZenvyLogo from './ZenvyLogo';
 
 export const Sidebar = ({ onOpenOmnibar }) => {
   const navigate = useNavigate();
@@ -44,7 +45,9 @@ export const Sidebar = ({ onOpenOmnibar }) => {
         
         {/* Logo ZENVY Brand */}
         <div className="px-2 py-1 select-none">
-          <span className="text-xl font-bold tracking-tight text-white block">ZENVY</span>
+          <div className="h-8 w-28 -ml-1">
+            <ZenvyLogo idPrefix="sidebar" />
+          </div>
           <p className="text-xs text-zinc-400 font-normal">Find Your Frequency.</p>
         </div>
 

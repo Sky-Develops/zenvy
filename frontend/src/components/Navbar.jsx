@@ -12,6 +12,7 @@ import {
   Radio
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ZenvyLogo from './ZenvyLogo';
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -37,17 +38,18 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           
           {/* Logo Brand */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zenvy-violet to-zenvy-violetDark flex items-center justify-center shadow-lg shadow-zenvy-violet/25 group-hover:scale-105 transition-transform duration-200">
-              <Radio className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="h-8 w-28">
+              <ZenvyLogo idPrefix="navbar" />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zenvy-violetLight bg-clip-text text-transparent">
-                ZENVY
-              </span>
+              {/* logo */}
+
+
               <span className="hidden sm:inline-block ml-2 text-xs text-zenvy-muted font-normal tracking-wide">
                 Find Your Frequency
               </span>
+
             </div>
           </Link>
 
@@ -78,6 +80,7 @@ export const Navbar = () => {
                   <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">
                     {user?.username || 'User'}
                   </span>
+    
                 </div>
                 <button
                   onClick={handleLogout}
