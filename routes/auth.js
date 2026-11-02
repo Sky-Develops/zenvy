@@ -116,6 +116,7 @@ router.post('/login', (req, res) => {
 router.get('/me', requireAuth, (req, res) => {
   return res.status(200).json({
     status: 'success',
+    ...req.user,
     user: req.user
   });
 });
