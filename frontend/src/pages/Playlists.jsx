@@ -206,10 +206,18 @@ export const Playlists = () => {
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link
                       to={`/playlist/${selectedPlaylist.id}/edit`}
+                      className="px-3.5 py-2 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Tambah Lagu</span>
+                    </Link>
+
+                    <Link
+                      to={`/playlist/${selectedPlaylist.id}/edit`}
                       className="px-3.5 py-2 rounded-lg bg-zenvy-cardElevated hover:bg-zenvy-border border border-zenvy-border text-white text-xs font-semibold flex items-center gap-1.5 transition"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                      <span>Edit & Susun Lagu</span>
+                      <span>Edit Info & Sampul</span>
                     </Link>
 
                     {selectedPlaylist.tracks && selectedPlaylist.tracks.length > 0 && (
@@ -239,7 +247,7 @@ export const Playlists = () => {
                               {idx + 1}
                             </span>
                             <img
-                              src={track.thumbnailUrl}
+                              src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
                               alt={track.title}
                               className="w-10 h-10 rounded-md object-cover flex-shrink-0"
                             />
@@ -285,13 +293,14 @@ export const Playlists = () => {
                     <Music className="w-10 h-10 text-zinc-600 mx-auto" />
                     <h4 className="text-sm font-semibold text-white">Playlist ini masih kosong</h4>
                     <p className="text-xs text-zenvy-muted max-w-sm mx-auto">
-                      Gunakan tombol "Edit & Susun Lagu" untuk menambahkan frekuensi musik atau jelajahi katalog.
+                      Tambahkan lagu dari daftar favorit Anda, cari lagu YouTube baru, atau gunakan rekomendasi cerdas.
                     </p>
                     <Link
                       to={`/playlist/${selectedPlaylist.id}/edit`}
-                      className="inline-block mt-2 text-xs font-semibold text-zenvy-violetSoft hover:underline"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold mt-2 shadow"
                     >
-                      Buka Editor Playlist $\rightarrow$
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Tambah Lagu Sekarang</span>
                     </Link>
                   </div>
                 )}

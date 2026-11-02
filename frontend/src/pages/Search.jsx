@@ -201,12 +201,35 @@ export const Search = () => {
                     <span className="text-xs text-zinc-400 font-mono">
                       {topMatch.musicalKey} • {topMatch.bpm} BPM
                     </span>
-                    <button
-                      onClick={() => playTrack(topMatch)}
-                      className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition shadow-lg"
-                    >
-                      <Play className="w-4 h-4 fill-current ml-0.5 text-black" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleToggleFavorite(topMatch)}
+                        className={`p-2 rounded-lg transition ${
+                          favoriteIds.has(topMatch.videoId || topMatch.id)
+                            ? 'text-red-500 bg-red-500/10'
+                            : 'text-zinc-400 hover:text-red-400 hover:bg-zenvy-cardElevated'
+                        }`}
+                        title={favoriteIds.has(topMatch.videoId || topMatch.id) ? "Hapus dari Favorit" : "Simpan ke Favorit"}
+                      >
+                        <Heart className={`w-4 h-4 ${favoriteIds.has(topMatch.videoId || topMatch.id) ? 'fill-current text-red-500' : ''}`} />
+                      </button>
+
+                      <button
+                        onClick={() => setModalMusic(topMatch)}
+                        className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zenvy-cardElevated transition"
+                        title="Tambah ke Playlist"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => playTrack(topMatch)}
+                        className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition shadow-lg"
+                        title="Putar Hasil Teratas"
+                      >
+                        <Play className="w-4 h-4 fill-current ml-0.5 text-black" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -219,6 +242,7 @@ export const Search = () => {
                 <div className="space-y-1.5">
                   {results.slice(0, 4).map((track, i) => {
                     const trackId = track.videoId || track.id;
+                    const isTrackFav = favoriteIds.has(trackId);
                     return (
                       <div
                         key={trackId}
@@ -242,10 +266,29 @@ export const Search = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                          <span className="hidden sm:inline text-[11px] text-zinc-400 font-mono">
+                        <div className="flex items-center gap-2">
+                          <span className="hidden sm:inline text-[11px] text-zinc-400 font-mono mr-1">
                             {track.views || '1.1M tayangan'}
                           </span>
+                          
+                          <button
+                            onClick={() => handleToggleFavorite(track)}
+                            className={`p-1.5 rounded transition ${
+                              isTrackFav ? 'text-red-500 bg-red-500/10' : 'text-zinc-400 hover:text-red-400 hover:bg-zenvy-obsidian'
+                            }`}
+                            title={isTrackFav ? "Hapus dari Favorit" : "Simpan ke Favorit"}
+                          >
+                            <Heart className={`w-3.5 h-3.5 ${isTrackFav ? 'fill-current text-red-500' : ''}`} />
+                          </button>
+
+                          <button
+                            onClick={() => setModalMusic(track)}
+                            className="p-1.5 rounded text-zinc-400 hover:text-white hover:bg-zenvy-obsidian transition"
+                            title="Tambah ke Playlist"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+
                           <button
                             onClick={() => playTrack(track)}
                             className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zenvy-violet/20"
@@ -300,4 +343,3 @@ export const Search = () => {
 };
 
 export default Search;
-

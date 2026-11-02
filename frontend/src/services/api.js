@@ -63,6 +63,15 @@ const getValidFavorites = () => {
   return stored;
 };
 
+const getValidPlaylists = () => {
+  const stored = getStorage('zenvy_playlists', null);
+  if (!stored || !Array.isArray(stored) || stored.some(pl => pl.tracks?.some(t => t.id === 'jfKfPfyJRdk' || t.id === 'DWcJFNfaw90'))) {
+    setStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+    return INITIAL_MOCK_PLAYLISTS;
+  }
+  return stored;
+};
+
 // Helper Decode Entitas HTML dari YouTube snippet
 const decodeHtmlEntities = (text) => {
   if (!text) return '';
@@ -355,7 +364,7 @@ export const favoritesApi = {
       return response.data;
     } catch {
       const current = getValidFavorites();
-      if (!current.some(item => item.id === music.id || item.videoId === music.videoId)) {
+      if (!current.some(item => (item.videoId || item.id) === (music.videoId || music.id))) {
         const updated = [music, ...current];
         setStorage('zenvy_favorites', updated);
       }
@@ -385,7 +394,7 @@ export const playlistApi = {
       const response = await apiClient.get('/playlists');
       return response.data?.items || response.data || [];
     } catch {
-      return getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      return getValidPlaylists();
     }
   },
 
@@ -394,7 +403,7 @@ export const playlistApi = {
       const response = await apiClient.get(`/playlists/${id}`);
       return response.data;
     } catch {
-      const playlists = getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      const playlists = getValidPlaylists();
       return playlists.find(p => p.id === id) || null;
     }
   },
@@ -404,7 +413,7 @@ export const playlistApi = {
       const response = await apiClient.post('/playlists', { name, description });
       return response.data;
     } catch {
-      const current = getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      const current = getValidPlaylists();
       const newPlaylist = {
         id: 'pl_' + Date.now(),
         name,
@@ -426,7 +435,7 @@ export const playlistApi = {
       const response = await apiClient.put(`/playlists/${id}`, updatedFields);
       return response.data;
     } catch {
-      const playlists = getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      const playlists = getValidPlaylists();
       const updated = playlists.map(pl => {
         if (pl.id === id) {
           return { ...pl, ...updatedFields };
@@ -443,7 +452,7 @@ export const playlistApi = {
       const response = await apiClient.put(`/playlists/${playlistId}/reorder`, { tracks: newTracks });
       return response.data;
     } catch {
-      const playlists = getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      const playlists = getValidPlaylists();
       const updated = playlists.map(pl => {
         if (pl.id === playlistId) {
           return { ...pl, tracks: newTracks };
@@ -460,7 +469,7 @@ export const playlistApi = {
       const response = await apiClient.post(`/playlists/${playlistId}/tracks`, track);
       return response.data;
     } catch {
-      const playlists = getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      const playlists = getValidPlaylists();
       const updated = playlists.map(pl => {
         if (pl.id === playlistId) {
           const exists = pl.tracks?.some(t => (t.id || t.videoId) === (track.id || track.videoId));
@@ -480,7 +489,7 @@ export const playlistApi = {
       const response = await apiClient.delete(`/playlists/${playlistId}/tracks/${trackId}`);
       return response.data;
     } catch {
-      const playlists = getStorage('zenvy_playlists', INITIAL_MOCK_PLAYLISTS);
+      const playlists = getValidPlaylists();
       const updated = playlists.map(pl => {
         if (pl.id === playlistId) {
           return {

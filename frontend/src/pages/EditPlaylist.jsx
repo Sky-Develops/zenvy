@@ -15,9 +15,11 @@ import {
   Sliders, 
   Check, 
   AlertCircle,
-  Radio
+  Radio,
+  Heart,
+  Search
 } from 'lucide-react';
-import { playlistApi, musicApi } from '../services/api';
+import { playlistApi, musicApi, favoritesApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -48,7 +50,14 @@ export const EditPlaylist = () => {
   const [tags, setTags] = useState([]);
   const [newTagInput, setNewTagInput] = useState('');
   const [tracks, setTracks] = useState([]);
+  
+  // States penambahan lagu
+  const [favoriteTracks, setFavoriteTracks] = useState([]);
   const [recommendedTracks, setRecommendedTracks] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [addModeTab, setAddModeTab] = useState('favorites'); // 'favorites' | 'search' | 'recommendations'
 
   useEffect(() => {
     loadPlaylistData();
@@ -57,7 +66,12 @@ export const EditPlaylist = () => {
   const loadPlaylistData = async () => {
     setLoading(true);
     try {
-      const data = await playlistApi.getById(id);
+      const [data, catalog, favs] = await Promise.all([
+        playlistApi.getById(id),
+        musicApi.search(''),
+        favoritesApi.getAll().catch(() => [])
+      ]);
+
       if (data) {
         setPlaylist(data);
         setName(data.name || '');
@@ -69,10 +83,10 @@ export const EditPlaylist = () => {
         setTracks(data.tracks || []);
       }
 
-      // Load recommended tracks for quick addition
-      const catalog = await musicApi.search('');
+      setFavoriteTracks(favs || []);
+
       const currentTrackIds = new Set((data?.tracks || []).map(t => t.videoId || t.id));
-      setRecommendedTracks(catalog.filter(t => !currentTrackIds.has(t.videoId || t.id)));
+      setRecommendedTracks((catalog || []).filter(t => !currentTrackIds.has(t.videoId || t.id)));
     } finally {
       setLoading(false);
     }
@@ -105,9 +119,30 @@ export const EditPlaylist = () => {
     setTracks(tracks.filter(t => (t.videoId || t.id) !== trackId));
   };
 
-  const addRecommendedTrack = (track) => {
-    setTracks([...tracks, track]);
-    setRecommendedTracks(recommendedTracks.filter(t => (t.videoId || t.id) !== (track.videoId || track.id)));
+  const isTrackInPlaylist = (track) => {
+    const tid = track.videoId || track.id;
+    return tracks.some(t => (t.videoId || t.id) === tid);
+  };
+
+  const addTrackToPlaylist = (track) => {
+    const tid = track.videoId || track.id;
+    if (tracks.some(t => (t.videoId || t.id) === tid)) return;
+    setTracks(prev => [...prev, track]);
+    setRecommendedTracks(prev => prev.filter(t => (t.videoId || t.id) !== tid));
+  };
+
+  const handleSearchSong = async (e) => {
+    e?.preventDefault();
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    try {
+      const res = await musicApi.search(searchQuery.trim());
+      setSearchResults(res || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleSave = async (e) => {
@@ -177,7 +212,7 @@ export const EditPlaylist = () => {
         <div className="flex items-center gap-3">
           {savedSuccess && (
             <span className="flex items-center gap-1.5 text-xs text-zinc-300 font-semibold bg-zenvy-card px-3 py-1.5 rounded-lg border border-zenvy-border">
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4 text-emerald-400" />
               Perubahan Disimpan
             </span>
           )}
@@ -360,7 +395,7 @@ export const EditPlaylist = () => {
           </form>
         </div>
 
-        {/* Kolom Kanan: Manajemen Lagu (Urutan & DNA) + Rekomendasi Cerdas */}
+        {/* Kolom Kanan: Manajemen Lagu (Urutan & DNA) + Tambah Lagu Bebas / Dari Favorit */}
         <div className="lg:col-span-7 space-y-6">
           
           {/* Card Daftar Lagu dalam Playlist */}
@@ -388,10 +423,10 @@ export const EditPlaylist = () => {
 
             {tracks.length === 0 ? (
               <p className="text-center text-xs text-zenvy-muted py-8">
-                Belum ada trek di playlist ini. Tambahkan dari rekomendasi cerdas di bawah.
+                Belum ada trek di playlist ini. Tambahkan dari lagu favorit Anda atau cari lagu di bawah.
               </p>
             ) : (
-              <div className="space-y-2 max-h-[460px] overflow-y-auto no-scrollbar pr-1">
+              <div className="space-y-2 max-h-[440px] overflow-y-auto no-scrollbar pr-1">
                 {tracks.map((track, idx) => {
                   const trackId = track.videoId || track.id;
                   return (
@@ -405,7 +440,7 @@ export const EditPlaylist = () => {
                           {idx + 1}
                         </span>
                         <img
-                          src={track.thumbnailUrl}
+                          src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
                           alt={track.title}
                           className="w-10 h-10 rounded-md object-cover flex-shrink-0"
                         />
@@ -459,49 +494,301 @@ export const EditPlaylist = () => {
             )}
           </div>
 
-          {/* Rekomendasi Lagu Tambahan Cerdas */}
-          <div className="p-5 rounded-2xl bg-zenvy-card border border-zenvy-border space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                <span>Rekomendasi Lagu Tambahan Cerdas</span>
-              </h3>
-              <span className="text-[10px] text-zinc-400 font-mono">Penyelarasan Harmonik 90%+</span>
+          {/* Card Penambahan Lagu ke Playlist (Bukan Hanya Rekomendasi!) */}
+          <div className="p-5 rounded-2xl bg-zenvy-card border border-zenvy-border space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zenvy-border">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+                  <Plus className="w-4 h-4 text-zenvy-violetSoft" />
+                  <span>Tambahkan Lagu ke Playlist Sendiri</span>
+                </h3>
+                <p className="text-[11px] text-zenvy-muted">
+                  Bebas menambahkan lagu dari Favorit Anda, pencarian YouTube, maupun rekomendasi.
+                </p>
+              </div>
+
+              {/* Tabs Sumber Tambah Lagu */}
+              <div className="flex items-center gap-1 bg-zenvy-obsidian p-1 rounded-lg border border-zenvy-border flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setAddModeTab('favorites')}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition flex items-center gap-1.5 ${
+                    addModeTab === 'favorites'
+                      ? 'bg-zenvy-violet text-white shadow'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Heart className="w-3 h-3 fill-current text-red-400" />
+                  <span>Lagu Favorit ({favoriteTracks.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAddModeTab('search')}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition flex items-center gap-1.5 ${
+                    addModeTab === 'search'
+                      ? 'bg-zenvy-violet text-white shadow'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Search className="w-3 h-3" />
+                  <span>Cari Lagu Bebas</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAddModeTab('recommendations')}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-md transition flex items-center gap-1.5 ${
+                    addModeTab === 'recommendations'
+                      ? 'bg-zenvy-violet text-white shadow'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3 text-purple-400" />
+                  <span>Rekomendasi</span>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              {recommendedTracks.slice(0, 3).map((rec) => {
-                const recId = rec.videoId || rec.id;
-                return (
-                  <div
-                    key={recId}
-                    className="p-2.5 rounded-xl bg-zenvy-obsidian hover:bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-between transition"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 pr-2">
-                      <img
-                        src={rec.thumbnailUrl}
-                        alt={rec.title}
-                        className="w-9 h-9 rounded object-cover flex-shrink-0"
-                      />
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-semibold text-white truncate">{rec.title}</h4>
-                        <p className="text-[10px] text-zinc-400 truncate">
-                          {rec.channelTitle} • {rec.musicalKey || 'A Minor'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => addRecommendedTrack(rec)}
-                      className="px-2.5 py-1.5 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold flex items-center gap-1 transition"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Tambah Cepat</span>
-                    </button>
+            {/* TAB 1: LAGU DARI DAFTAR FAVORIT SAYA */}
+            {addModeTab === 'favorites' && (
+              <div className="space-y-2">
+                {favoriteTracks.length === 0 ? (
+                  <div className="text-center py-8 space-y-2">
+                    <Heart className="w-8 h-8 text-zinc-600 mx-auto" />
+                    <p className="text-xs text-white font-medium">Belum ada lagu di daftar Favorit Anda.</p>
+                    <p className="text-[11px] text-zenvy-muted max-w-sm mx-auto">
+                      Beri tanda suka (ikon hati) pada lagu apa saja di menu Home, Search, atau Explore untuk menampilkannya di sini.
+                    </p>
                   </div>
-                );
-              })}
-            </div>
+                ) : (
+                  <div className="space-y-2 max-h-[380px] overflow-y-auto no-scrollbar pr-1">
+                    {favoriteTracks.map((fav) => {
+                      const favId = fav.videoId || fav.id;
+                      const inPlaylist = isTrackInPlaylist(fav);
+                      return (
+                        <div
+                          key={favId}
+                          className="p-2.5 rounded-xl bg-zenvy-obsidian hover:bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-between gap-3 transition"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                            <img
+                              src={fav.thumbnailUrl || `https://i.ytimg.com/vi/${favId}/hqdefault.jpg`}
+                              alt={fav.title}
+                              className="w-10 h-10 rounded-md object-cover flex-shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-semibold text-white truncate">{fav.title}</h4>
+                              <p className="text-[10px] text-zinc-400 truncate">
+                                {fav.channelTitle} • {fav.musicalKey || 'F# Minor'} • {fav.bpm || 80} BPM
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => playTrack(fav)}
+                              className="p-1.5 rounded-lg text-zinc-300 hover:text-white hover:bg-zenvy-card"
+                              title="Uji Putar"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => !inPlaylist && addTrackToPlaylist(fav)}
+                              disabled={inPlaylist}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
+                                inPlaylist
+                                  ? 'bg-zinc-800 text-zinc-400 border border-zinc-700 cursor-default'
+                                  : 'bg-zenvy-violet hover:bg-purple-700 text-white shadow'
+                              }`}
+                            >
+                              {inPlaylist ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>Di Playlist</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>Tambah ke Playlist</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 2: CARI LAGU BEBAS (YOUTUBE & KATALOG) */}
+            {addModeTab === 'search' && (
+              <div className="space-y-3">
+                <form onSubmit={handleSearchSong} className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Cari lagu YouTube apa saja (misal: Lofi Girl, Alan Walker, Synthwave)..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 text-xs rounded-lg bg-zenvy-obsidian border border-zenvy-border text-white placeholder-zinc-500 focus:outline-none focus:border-zenvy-violet"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSearching || !searchQuery.trim()}
+                    className="px-4 py-2.5 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold disabled:opacity-50 transition"
+                  >
+                    {isSearching ? 'Mencari...' : 'Cari Lagu'}
+                  </button>
+                </form>
+
+                {isSearching ? (
+                  <LoadingSpinner message="Mencari lagu di YouTube Data API..." size="sm" />
+                ) : searchResults.length > 0 ? (
+                  <div className="space-y-2 max-h-[380px] overflow-y-auto no-scrollbar pr-1">
+                    {searchResults.map((song) => {
+                      const sId = song.videoId || song.id;
+                      const inPlaylist = isTrackInPlaylist(song);
+                      return (
+                        <div
+                          key={sId}
+                          className="p-2.5 rounded-xl bg-zenvy-obsidian hover:bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-between gap-3 transition"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
+                            <img
+                              src={song.thumbnailUrl || `https://i.ytimg.com/vi/${sId}/hqdefault.jpg`}
+                              alt={song.title}
+                              className="w-10 h-10 rounded-md object-cover flex-shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-semibold text-white truncate">{song.title}</h4>
+                              <p className="text-[10px] text-zinc-400 truncate">
+                                {song.channelTitle} • {song.musicalKey || 'F# Minor'} • {song.bpm || 80} BPM
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => playTrack(song)}
+                              className="p-1.5 rounded-lg text-zinc-300 hover:text-white hover:bg-zenvy-card"
+                              title="Uji Putar"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-current" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => !inPlaylist && addTrackToPlaylist(song)}
+                              disabled={inPlaylist}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
+                                inPlaylist
+                                  ? 'bg-zinc-800 text-zinc-400 border border-zinc-700 cursor-default'
+                                  : 'bg-zenvy-violet hover:bg-purple-700 text-white shadow'
+                              }`}
+                            >
+                              {inPlaylist ? (
+                                <>
+                                  <Check className="w-3.5 h-3.5" />
+                                  <span>Di Playlist</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>Tambah ke Playlist</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-center text-xs text-zenvy-muted py-6">
+                    Ketik judul lagu atau musisi di atas untuk mencari dan menambahkannya ke playlist ini.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* TAB 3: REKOMENDASI CERDAS */}
+            {addModeTab === 'recommendations' && (
+              <div className="space-y-2 max-h-[380px] overflow-y-auto no-scrollbar pr-1">
+                {recommendedTracks.length === 0 ? (
+                  <p className="text-center text-xs text-zenvy-muted py-6">
+                    Semua lagu rekomendasi sudah ada di dalam playlist ini.
+                  </p>
+                ) : (
+                  recommendedTracks.map((rec) => {
+                    const recId = rec.videoId || rec.id;
+                    const inPlaylist = isTrackInPlaylist(rec);
+                    return (
+                      <div
+                        key={recId}
+                        className="p-2.5 rounded-xl bg-zenvy-obsidian hover:bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-between transition"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 pr-2 flex-1">
+                          <img
+                            src={rec.thumbnailUrl || `https://i.ytimg.com/vi/${recId}/hqdefault.jpg`}
+                            alt={rec.title}
+                            className="w-10 h-10 rounded-md object-cover flex-shrink-0"
+                          />
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-semibold text-white truncate">{rec.title}</h4>
+                            <p className="text-[10px] text-zinc-400 truncate">
+                              {rec.channelTitle} • {rec.musicalKey || 'A Minor'} • {rec.bpm || 80} BPM
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => playTrack(rec)}
+                            className="p-1.5 rounded-lg text-zinc-300 hover:text-white hover:bg-zenvy-card"
+                            title="Uji Putar"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => !inPlaylist && addTrackToPlaylist(rec)}
+                            disabled={inPlaylist}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition ${
+                              inPlaylist
+                                ? 'bg-zinc-800 text-zinc-400 border border-zinc-700 cursor-default'
+                                : 'bg-zenvy-violet hover:bg-purple-700 text-white shadow'
+                            }`}
+                          >
+                            {inPlaylist ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Di Playlist</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>Tambah Cepat</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -510,4 +797,3 @@ export const EditPlaylist = () => {
 };
 
 export default EditPlaylist;
-
