@@ -39,7 +39,7 @@ export const Navbar = () => {
           
           {/* Logo Brand */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="h-8 w-28">
+            <div className="h-9 w-32">
               <ZenvyLogo idPrefix="navbar" />
             </div>
             <div>

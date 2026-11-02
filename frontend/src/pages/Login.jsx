@@ -48,7 +48,7 @@ export const Login = () => {
 
         {/* Brand header */}
         <div className="text-center mb-8">
-          {/* logo */}<div className="h-12 w-44 mx-auto mb-3">
+          <div className="h-14 w-52 mx-auto mb-3">
             <ZenvyLogo idPrefix="login" />
           </div>
 

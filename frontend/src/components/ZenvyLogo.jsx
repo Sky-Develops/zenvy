@@ -4,7 +4,7 @@ export const ZenvyLogo = ({ className = "w-full h-full", idPrefix = "zenvy" }) =
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 800 240" 
+      viewBox="100 30 600 180" 
       width="100%" 
       height="100%"
       className={className}
@@ -30,13 +30,13 @@ export const ZenvyLogo = ({ className = "w-full h-full", idPrefix = "zenvy" }) =
 
       <g filter={`url(#${idPrefix}SoftGlow)`}>
         <text 
-          x="50%" 
-          y="58%" 
+          x="400" 
+          y="135" 
           textAnchor="middle" 
           dominantBaseline="central" 
           fill={`url(#${idPrefix}Purple)`} 
           fontFamily="system-ui, -apple-system, 'Inter', 'Montserrat', 'Segoe UI', Roboto, sans-serif" 
-          fontSize="115" 
+          fontSize="175" 
           fontWeight="900" 
           fontStyle="normal" 
           letterSpacing="4"
