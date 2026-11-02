@@ -5,7 +5,8 @@ import {
   ChevronRight, 
   Search, 
   LogOut, 
-  Menu 
+  Menu,
+  User 
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -65,16 +66,11 @@ export const Header = ({ onOpenOmnibar, onToggleMobileMenu }) => {
       <div className="flex items-center gap-3">
         {isAuthenticated ? (
           <div className="flex items-center gap-2.5">
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-zenvy-card border border-zenvy-border">
-              <div className="w-6 h-6 rounded-full bg-zenvy-violet flex items-center justify-center text-[11px] font-bold text-white">
-                {user?.username?.charAt(0).toUpperCase() || 'U'}
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-xs font-semibold text-white truncate max-w-[110px] leading-tight">
-                  {user?.username || 'User'}
-                </p>
-                <p className="text-[10px] text-zinc-400 leading-none">Pengguna</p>
-              </div>
+            <div className="flex items-center gap-2 text-zinc-300">
+              <User className="w-4 h-4 text-zinc-400" />
+              <span className="text-xs font-medium text-white truncate max-w-[120px]">
+                {user?.username || 'User'}
+              </span>
             </div>
 
             <button

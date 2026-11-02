@@ -9,7 +9,8 @@ import {
   UserPlus, 
   Menu, 
   X,
-  Radio
+  Radio,
+  User
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ZenvyLogo from './ZenvyLogo';
@@ -73,10 +74,10 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zenvy-card border border-zenvy-border">
-                  <div className="w-6 h-6 rounded-full bg-zenvy-cardElevated text-zinc-300 flex items-center justify-center text-xs font-bold">
-                    {user?.username?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                <div className="flex items-center gap-2 text-zinc-300">
+                  <User className="w-4 h-4 text-zinc-400" />
+
+
                   <span className="text-sm font-medium text-zinc-200 max-w-[120px] truncate">
                     {user?.username || 'User'}
                   </span>
