@@ -5,9 +5,9 @@
 
 export const INITIAL_MOCK_MUSIC = [
   {
-    id: "jfKfPfyJRdk",
-    videoId: "jfKfPfyJRdk",
-    title: "Lofi Hip Hop Radio - Beats untuk Belajar & Relaksasi",
+    id: "n61ULEU7CO0",
+    videoId: "n61ULEU7CO0",
+    title: "Best of Lofi Hip Hop - Beats untuk Belajar & Relaksasi",
     channelTitle: "Lofi Girl",
     thumbnailUrl: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=700&q=80",
     description: "Ketukan lofi santai untuk menemani sesi belajar, membaca, atau bekerja. Temukan frekuensi ketenangan pikiran.",
@@ -20,12 +20,12 @@ export const INITIAL_MOCK_MUSIC = [
     momentum: "+58% minggu ini",
     harmonicMatch: 98,
     masterStudio: "Lofi Labs Studio Tokyo",
-    durationSec: 214,
+    durationSec: 360,
     views: "1.2M tayangan"
   },
   {
-    id: "5qap5aO4i9A",
-    videoId: "5qap5aO4i9A",
+    id: "0QKQlf8r7ls",
+    videoId: "0QKQlf8r7ls",
     title: "Synthwave / Chillwave - Sesi Berkendara Larut Malam",
     channelTitle: "Neon Nights",
     thumbnailUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=700&q=80",
@@ -39,12 +39,12 @@ export const INITIAL_MOCK_MUSIC = [
     momentum: "+74% minggu ini",
     harmonicMatch: 94,
     masterStudio: "Analog Waveform Berlin",
-    durationSec: 248,
+    durationSec: 280,
     views: "890K tayangan"
   },
   {
-    id: "DWcJFNfaw90",
-    videoId: "DWcJFNfaw90",
+    id: "RYcaG64JkqM",
+    videoId: "RYcaG64JkqM",
     title: "Fokus Mendalam & Gelombang Suara (Penyelarasan 432 Hz)",
     channelTitle: "Frequency Labs",
     thumbnailUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=700&q=80",
@@ -62,9 +62,9 @@ export const INITIAL_MOCK_MUSIC = [
     views: "2.4M tayangan"
   },
   {
-    id: "1fueZCTYkpA",
-    videoId: "1fueZCTYkpA",
-    title: "Melodi Senja Akustik Indie",
+    id: "wFy9kud8FHE",
+    videoId: "wFy9kud8FHE",
+    title: "Melodi Senja Akustik Indie - Ketenangan Pagi",
     channelTitle: "Indie Reverie",
     thumbnailUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80",
     description: "Petikan gitar akustik organik yang dipadukan dengan alunan cello vintage untuk sore hari yang damai dan reflektif.",
@@ -77,12 +77,12 @@ export const INITIAL_MOCK_MUSIC = [
     momentum: "+41% minggu ini",
     harmonicMatch: 89,
     masterStudio: "Sound Haven Nashville",
-    durationSec: 195,
+    durationSec: 240,
     views: "430K tayangan"
   },
   {
-    id: "kJQP7kiw5Fk",
-    videoId: "kJQP7kiw5Fk",
+    id: "XxQCs5fWM2A",
+    videoId: "XxQCs5fWM2A",
     title: "Cyberpunk 2077 Dark Wave Techno Experience",
     channelTitle: "Violet Frequencies",
     thumbnailUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80",
@@ -96,12 +96,12 @@ export const INITIAL_MOCK_MUSIC = [
     momentum: "+83% minggu ini",
     harmonicMatch: 96,
     masterStudio: "Night City Audio FX",
-    durationSec: 280,
+    durationSec: 310,
     views: "1.7M tayangan"
   },
   {
-    id: "fEvM-OUqgKs",
-    videoId: "fEvM-OUqgKs",
+    id: "gCWaRhNUvfc",
+    videoId: "gCWaRhNUvfc",
     title: "Ambient Kosmik & Reverb Angkasa Luar",
     channelTitle: "Astral Frequency",
     thumbnailUrl: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=700&q=80",
@@ -115,7 +115,7 @@ export const INITIAL_MOCK_MUSIC = [
     momentum: "+65% minggu ini",
     harmonicMatch: 95,
     masterStudio: "Starlight Soundstage Oslo",
-    durationSec: 410,
+    durationSec: 420,
     views: "610K tayangan"
   }
 ];

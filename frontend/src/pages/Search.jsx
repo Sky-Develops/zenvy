@@ -40,7 +40,10 @@ export const Search = () => {
   const { playTrack } = usePlayer();
 
   useEffect(() => {
-    executeSearch(query);
+    const timer = setTimeout(() => {
+      executeSearch(query);
+    }, query ? 450 : 0);
+    return () => clearTimeout(timer);
   }, [query, activeTab]);
 
   const executeSearch = async (val) => {

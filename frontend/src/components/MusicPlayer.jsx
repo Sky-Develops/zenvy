@@ -47,6 +47,10 @@ export const MusicPlayer = () => {
   const [hasError, setHasError] = useState(false);
   const [isFav, setIsFav] = useState(false);
 
+  useEffect(() => {
+    setHasError(false);
+  }, [currentTrack]);
+
 
   useEffect(() => {
     const iframe = document.getElementById('youtube-player-iframe');
@@ -118,13 +122,13 @@ export const MusicPlayer = () => {
     <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
       
       {/* Layar Video & Audio Player IFrame YouTube */}
-      <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-zenvy-border block" : "fixed -top-[9999px] -left-[9999px] w-1 h-1 opacity-0 pointer-events-none"}>
+      <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-zenvy-border block" : "fixed -bottom-[9999px] -right-[9999px] w-[320px] h-[180px] pointer-events-none"}>
         <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xl border border-zenvy-border">
           <iframe
             id="youtube-player-iframe"
             key={trackId}
             title={currentTrack.title}
-            src={`https://www.youtube-nocookie.com/embed/${trackId}?autoplay=1&enablejsapi=1`}
+            src={`https://www.youtube-nocookie.com/embed/${trackId}?autoplay=1&enablejsapi=1&playsinline=1`}
             className="w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

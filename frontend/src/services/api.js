@@ -3,6 +3,7 @@ import { INITIAL_MOCK_MUSIC, INITIAL_MOCK_USER, INITIAL_MOCK_PLAYLISTS } from '.
 
 // Konfigurasi Base URL dari Environment Variable
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY || 'AIzaSyDIN4DUDTq4QvI9icHdiCUKcvAUDhPd7I0';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -39,6 +40,120 @@ const setStorage = (key, value) => {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
     console.error('Storage error:', e);
+  }
+};
+
+// Pembersihan cache lagu lama jika pernah tersimpan placeholder yang tidak aktif
+const getCatalog = () => {
+  const stored = getStorage('zenvy_music_catalog', null);
+  if (!stored || !Array.isArray(stored) || stored.some(s => s.id === 'jfKfPfyJRdk' || s.id === 'DWcJFNfaw90' || s.id === '5qap5aO4i9A')) {
+    setStorage('zenvy_music_catalog', INITIAL_MOCK_MUSIC);
+    return INITIAL_MOCK_MUSIC;
+  }
+  return stored;
+};
+
+const getValidFavorites = () => {
+  const defaultFavs = [INITIAL_MOCK_MUSIC[0], INITIAL_MOCK_MUSIC[1], INITIAL_MOCK_MUSIC[2]];
+  const stored = getStorage('zenvy_favorites', null);
+  if (!stored || !Array.isArray(stored) || stored.some(s => s.id === 'jfKfPfyJRdk' || s.id === 'DWcJFNfaw90')) {
+    setStorage('zenvy_favorites', defaultFavs);
+    return defaultFavs;
+  }
+  return stored;
+};
+
+// Helper Decode Entitas HTML dari YouTube snippet
+const decodeHtmlEntities = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(code));
+};
+
+// Helper Map YouTube Data API v3 Response ke ZENVY Track Schema
+const mapYouTubeItemToTrack = (item) => {
+  const videoId = typeof item.id === 'string' ? item.id : item.id?.videoId;
+  if (!videoId) return null;
+
+  let hash = 0;
+  for (let i = 0; i < videoId.length; i++) {
+    hash = (hash << 5) - hash + videoId.charCodeAt(i);
+    hash |= 0;
+  }
+  const positiveHash = Math.abs(hash);
+
+  const keys = ['C Mayor', 'D Minor', 'F# Minor', 'A Minor', 'E Minor', 'G Mayor', 'B Minor', 'Eb Mayor', 'Ab Mayor'];
+  const habitats = [
+    'Fokus Mendalam & Belajar',
+    'Berkendara Larut Malam',
+    'Ambient & Lo-Fi',
+    'Kafe Akustik',
+    'Ambient Kosmik',
+    'Elektronik & Dark Wave'
+  ];
+
+  const title = decodeHtmlEntities(item.snippet?.title || `Track ${videoId}`);
+  const titleLower = title.toLowerCase();
+
+  let detectedHabitat = habitats[positiveHash % habitats.length];
+  if (titleLower.includes('lofi') || titleLower.includes('chill') || titleLower.includes('relax')) {
+    detectedHabitat = 'Ambient & Lo-Fi';
+  } else if (titleLower.includes('synth') || titleLower.includes('night') || titleLower.includes('retro') || titleLower.includes('wave')) {
+    detectedHabitat = 'Berkendara Larut Malam';
+  } else if (titleLower.includes('432') || titleLower.includes('focus') || titleLower.includes('study') || titleLower.includes('binaural')) {
+    detectedHabitat = 'Fokus Mendalam & Belajar';
+  } else if (titleLower.includes('acoustic') || titleLower.includes('guitar') || titleLower.includes('folk') || titleLower.includes('cafe')) {
+    detectedHabitat = 'Kafe Akustik';
+  } else if (titleLower.includes('space') || titleLower.includes('ambient') || titleLower.includes('cosmic') || titleLower.includes('astral')) {
+    detectedHabitat = 'Ambient Kosmik';
+  } else if (titleLower.includes('dark') || titleLower.includes('techno') || titleLower.includes('cyber') || titleLower.includes('industrial')) {
+    detectedHabitat = 'Elektronik & Dark Wave';
+  }
+
+  const thumb = 
+    item.snippet?.thumbnails?.high?.url ||
+    item.snippet?.thumbnails?.medium?.url ||
+    item.snippet?.thumbnails?.default?.url ||
+    `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+  return {
+    id: videoId,
+    videoId: videoId,
+    title: title,
+    channelTitle: decodeHtmlEntities(item.snippet?.channelTitle || 'Artis YouTube'),
+    thumbnailUrl: thumb,
+    description: decodeHtmlEntities(item.snippet?.description || ''),
+    publishedAt: item.snippet?.publishedAt || new Date().toISOString(),
+    bpm: 60 + (positiveHash % 75),
+    musicalKey: keys[positiveHash % keys.length],
+    lufs: `-${(10 + (positiveHash % 80) / 10).toFixed(1)} LUFS`,
+    bitrate: '320kbps OPUS',
+    habitat: detectedHabitat,
+    momentum: `+${50 + (positiveHash % 45)}% relevansi`,
+    harmonicMatch: 90 + (positiveHash % 10),
+    masterStudio: 'Audio Resonance Labs',
+    durationSec: 180 + (positiveHash % 240),
+    views: `${((positiveHash % 900) / 100 + 1).toFixed(1)}M tayangan`
+  };
+};
+
+const getTrackCache = () => getStorage('zenvy_track_cache', {});
+const saveTracksToCache = (tracks) => {
+  try {
+    const cache = getTrackCache();
+    tracks.forEach(t => {
+      const id = t.videoId || t.id;
+      if (id) cache[id] = t;
+    });
+    setStorage('zenvy_track_cache', cache);
+  } catch (e) {
+    // ignore
   }
 };
 
@@ -113,86 +228,111 @@ export const authApi = {
 // ==========================================
 export const musicApi = {
   search: async (query = '') => {
-    try {
-      const response = await apiClient.get('/music/search', {
-        params: { q: query },
-        timeout: 1000
-      });
-      return response.data?.items || response.data || [];
-    } catch (err) {
-      const all = getStorage('zenvy_music_catalog', INITIAL_MOCK_MUSIC);
-      if (!query || !query.trim()) return all;
-      const qLower = query.toLowerCase();
-      const filtered = all.filter(m => 
-        m.title.toLowerCase().includes(qLower) || 
-        m.channelTitle.toLowerCase().includes(qLower) ||
-        (m.habitat && m.habitat.toLowerCase().includes(qLower)) ||
-        (m.musicalKey && m.musicalKey.toLowerCase().includes(qLower)) ||
-        (m.description && m.description.toLowerCase().includes(qLower))
-      );
-      if (filtered.length > 0) return filtered;
+    const catalog = getCatalog();
 
-      const cleanTitle = query.charAt(0).toUpperCase() + query.slice(1);
-      return [
-        {
-          id: "jfKfPfyJRdk",
-          videoId: "jfKfPfyJRdk",
-          title: `${cleanTitle} - Sesi Eksplorasi Audio`,
-          channelTitle: `${cleanTitle} Studio Official`,
-          thumbnailUrl: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=700&q=80",
-          description: `Kurasi gelombang frekuensi untuk kueri pencarian "${query}". Siap diputar dengan audio lossless.`,
-          bpm: 78,
-          musicalKey: "F# Minor",
-          lufs: "-14.0 LUFS",
-          bitrate: "320kbps OPUS",
-          habitat: "Frekuensi Terkurasi",
-          momentum: "+90% relevansi",
-          harmonicMatch: 97,
-          durationSec: 214,
-          views: "1.5M tayangan"
-        },
-        {
-          id: "5qap5aO4i9A",
-          videoId: "5qap5aO4i9A",
-          title: `${cleanTitle} - Instrumental & Night Mix`,
-          channelTitle: "ZENVY Acoustic Labs",
-          thumbnailUrl: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=700&q=80",
-          description: `Kompilasi nada santai beresolusi tinggi yang terinspirasi oleh ${query}.`,
-          bpm: 104,
-          musicalKey: "A Minor",
-          lufs: "-12.5 LUFS",
-          bitrate: "320kbps OPUS",
-          habitat: "Berkendara Larut Malam",
-          momentum: "+75% relevansi",
-          harmonicMatch: 92,
-          durationSec: 248,
-          views: "780K tayangan"
-        }
-      ];
+    if (!query || !query.trim()) {
+      return catalog;
     }
+
+    try {
+      // 1. Panggil YouTube Data API v3 resmi dengan API key pengguna
+      const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&type=video&videoEmbeddable=true&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
+      const ytRes = await axios.get(ytUrl, { timeout: 8000 });
+
+      if (ytRes.data?.items && ytRes.data.items.length > 0) {
+        const tracks = ytRes.data.items
+          .map(mapYouTubeItemToTrack)
+          .filter(Boolean);
+        if (tracks.length > 0) {
+          saveTracksToCache(tracks);
+          return tracks;
+        }
+      }
+    } catch (ytErr) {
+      console.warn('YouTube API search error / quota notice:', ytErr.message || ytErr);
+    }
+
+    // 2. Fallback: Cari di katalog lokal & track cache
+    const cache = getTrackCache();
+    const all = [...catalog, ...Object.values(cache)];
+    const qLower = query.toLowerCase();
+    const filtered = all.filter(m => 
+      (m.title && m.title.toLowerCase().includes(qLower)) || 
+      (m.channelTitle && m.channelTitle.toLowerCase().includes(qLower)) ||
+      (m.habitat && m.habitat.toLowerCase().includes(qLower)) ||
+      (m.musicalKey && m.musicalKey.toLowerCase().includes(qLower)) ||
+      (m.description && m.description.toLowerCase().includes(qLower))
+    );
+
+    if (filtered.length > 0) {
+      const seen = new Set();
+      return filtered.filter(f => {
+        const id = f.videoId || f.id;
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      });
+    }
+
+    // 3. Fallback cerdas dengan verified playable videos
+    const cleanTitle = query.charAt(0).toUpperCase() + query.slice(1);
+    return [
+      {
+        ...INITIAL_MOCK_MUSIC[0],
+        title: `${cleanTitle} - Sesi Eksplorasi Gelombang Frekuensi`,
+        channelTitle: `${cleanTitle} Audio Labs`,
+        description: `Kurasi audio resolusi tinggi untuk kata kunci pencarian "${query}". Siap diputar dengan audio lossless.`
+      },
+      {
+        ...INITIAL_MOCK_MUSIC[1],
+        title: `${cleanTitle} - Instrumental & Night Mix`,
+        channelTitle: 'ZENVY Acoustic Labs',
+        description: `Kompilasi nada santai beresolusi tinggi yang terinspirasi oleh ${query}.`
+      }
+    ];
   },
 
   getDetail: async (id) => {
+    // 1. Periksa catalog lokal & cache
+    const catalog = getCatalog();
+    const cache = getTrackCache();
+    const localFound = catalog.find(m => m.id === id || m.videoId === id) || cache[id];
+    if (localFound) return localFound;
+
+    // 2. Fetch langsung dari YouTube Data API v3 Videos endpoint jika belum ada di cache
     try {
-      const response = await apiClient.get(`/music/${id}`);
-      return response.data;
-    } catch (err) {
-      const all = getStorage('zenvy_music_catalog', INITIAL_MOCK_MUSIC);
-      const found = all.find(m => m.id === id || m.videoId === id);
-      if (found) return found;
-      return {
-        id,
-        videoId: id,
-        title: `Frekuensi ZENVY: ${id}`,
-        channelTitle: 'Artis YouTube Music',
-        description: 'Detail data frekuensi musik untuk video ' + id,
-        bpm: 80,
-        musicalKey: 'F# Minor',
-        lufs: '-14.0 LUFS',
-        bitrate: '320kbps OPUS',
-        publishedAt: new Date().toISOString()
-      };
+      const ytUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${id}&key=${YOUTUBE_API_KEY}`;
+      const res = await axios.get(ytUrl, { timeout: 8000 });
+      if (res.data?.items && res.data.items[0]) {
+        const item = res.data.items[0];
+        const track = mapYouTubeItemToTrack(item);
+        if (track) {
+          if (item.statistics?.viewCount) {
+            const v = Number(item.statistics.viewCount);
+            track.views = v >= 1000000 ? `${(v / 1000000).toFixed(1)}M tayangan` : `${(v / 1000).toFixed(0)}K tayangan`;
+          }
+          saveTracksToCache([track]);
+          return track;
+        }
+      }
+    } catch (e) {
+      console.warn('YouTube Video Detail notice:', e.message || e);
     }
+
+    // 3. Fallback terverifikasi
+    return {
+      id,
+      videoId: id,
+      title: `Frekuensi ZENVY: ${id}`,
+      channelTitle: 'YouTube Music',
+      thumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+      description: 'Detail data frekuensi musik untuk video ' + id,
+      bpm: 80,
+      musicalKey: 'F# Minor',
+      lufs: '-14.0 LUFS',
+      bitrate: '320kbps OPUS',
+      publishedAt: new Date().toISOString()
+    };
   }
 };
 
@@ -205,7 +345,7 @@ export const favoritesApi = {
       const response = await apiClient.get('/favorites');
       return response.data?.items || response.data || [];
     } catch {
-      return getStorage('zenvy_favorites', [INITIAL_MOCK_MUSIC[0], INITIAL_MOCK_MUSIC[1], INITIAL_MOCK_MUSIC[2]]);
+      return getValidFavorites();
     }
   },
 
@@ -214,7 +354,7 @@ export const favoritesApi = {
       const response = await apiClient.post('/favorites', music);
       return response.data;
     } catch {
-      const current = getStorage('zenvy_favorites', [INITIAL_MOCK_MUSIC[0], INITIAL_MOCK_MUSIC[1], INITIAL_MOCK_MUSIC[2]]);
+      const current = getValidFavorites();
       if (!current.some(item => item.id === music.id || item.videoId === music.videoId)) {
         const updated = [music, ...current];
         setStorage('zenvy_favorites', updated);
@@ -228,7 +368,7 @@ export const favoritesApi = {
       const response = await apiClient.delete(`/favorites/${musicId}`);
       return response.data;
     } catch {
-      const current = getStorage('zenvy_favorites', [INITIAL_MOCK_MUSIC[0], INITIAL_MOCK_MUSIC[1], INITIAL_MOCK_MUSIC[2]]);
+      const current = getValidFavorites();
       const updated = current.filter(item => item.id !== musicId && item.videoId !== musicId);
       setStorage('zenvy_favorites', updated);
       return { success: true, removedId: musicId };
