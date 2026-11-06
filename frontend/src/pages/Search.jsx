@@ -6,12 +6,9 @@ import {
   Play, 
   Heart, 
   Plus, 
-  Disc3, 
-  Radio, 
-  ArrowRight 
 } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { musicApi, favoritesApi, playlistApi } from '../services/api';
+import { musicApi, favoritesApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';
 import MusicCard from '../components/MusicCard';

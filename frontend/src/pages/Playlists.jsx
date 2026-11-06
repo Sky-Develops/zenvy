@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ListMusic, 
-  Plus, 
-  Play, 
-  Trash2, 
-  Music, 
-  FolderPlus, 
+import {
+  ListMusic,
+  Plus,
+  Play,
+  Trash2,
+  Music,
+  FolderPlus,
   ArrowRight,
   Edit3,
   Globe,
   Lock,
-  Sparkles,
   X
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';

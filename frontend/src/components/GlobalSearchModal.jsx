@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Music, Radio, Sparkles, CornerDownLeft } from 'lucide-react';
+import { Search, X, CornerDownLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { musicApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';

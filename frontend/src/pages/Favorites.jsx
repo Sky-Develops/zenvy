@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Search, Play, Trash2, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Heart, Search, Play } from 'lucide-react';
+
 import { favoritesApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
 import { useAuth } from '../context/AuthContext';

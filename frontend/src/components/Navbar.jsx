@@ -9,7 +9,6 @@ import {
   UserPlus, 
   Menu, 
   X,
-  Radio,
   User
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -44,9 +43,6 @@ export const Navbar = () => {
               <ZenvyLogo idPrefix="navbar" />
             </div>
             <div>
-              {/* logo */}
-
-
               <span className="hidden sm:inline-block ml-2 text-xs text-zenvy-muted font-normal tracking-wide">
                 Find Your Frequency
               </span>

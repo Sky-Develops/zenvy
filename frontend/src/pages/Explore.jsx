@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Sparkles, 
-  Flame, 
-  Compass, 
-  Radio, 
-  ArrowUpRight 
-} from 'lucide-react';
+import { Sparkles, Flame, Radio, ArrowUpRight } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import MusicCard from '../components/MusicCard';
 import LoadingSpinner from '../components/LoadingSpinner';

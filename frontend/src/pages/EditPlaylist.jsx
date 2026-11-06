@@ -12,10 +12,8 @@ import {
   Sparkles, 
   Globe, 
   Lock, 
-  Sliders, 
   Check, 
   AlertCircle,
-  Radio,
   Heart,
   Search
 } from 'lucide-react';

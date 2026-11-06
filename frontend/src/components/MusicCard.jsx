@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Heart, Plus, ExternalLink, Activity, Sparkles } from 'lucide-react';
+import { Play, Heart, Plus, ExternalLink, Sparkles } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 
 export const MusicCard = ({
