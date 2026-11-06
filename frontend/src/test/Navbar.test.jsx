@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
@@ -7,7 +8,7 @@ import { AuthProvider } from '../context/AuthContext';
 describe('Navbar Component', () => {
   it('renders ZENVY brand and tagline', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <Navbar />
         </AuthProvider>
@@ -20,7 +21,7 @@ describe('Navbar Component', () => {
 
   it('contains navigation links for Discover, Favorites, and Playlists', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <Navbar />
         </AuthProvider>

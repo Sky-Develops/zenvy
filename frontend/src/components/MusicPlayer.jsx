@@ -5,6 +5,9 @@ import {
   Pause, 
   X, 
   Maximize2, 
+  Minimize2,
+  Video,
+  VideoOff,
   Volume2, 
   VolumeX, 
   AlertCircle, 
@@ -58,21 +61,54 @@ export const MusicPlayer = () => {
   } = usePlayer();
 
   const [showVideo, setShowVideo] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isFav, setIsFav] = useState(false);
   const [modalMusic, setModalMusic] = useState(null);
   const [scrubTime, setScrubTime] = useState(null);
 
   const iframeRef = useRef(null);
+  const videoContainerRef = useRef(null);
   const playerRef = useRef(null);
   const isScrubbingRef = useRef(false);
+  const pendingSeekRef = useRef(null);
+  const seekTimeoutRef = useRef(null);
   const isLoopRef = useRef(isLoop);
   const prevIsPlayingRef = useRef(isPlaying);
   const prevTrackIdRef = useRef(null);
 
   useEffect(() => {
+    return () => {
+      if (seekTimeoutRef.current) {
+        clearTimeout(seekTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     isLoopRef.current = isLoop;
   }, [isLoop]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!videoContainerRef.current) return;
+    if (!document.fullscreenElement) {
+      if (videoContainerRef.current.requestFullscreen) {
+        videoContainerRef.current.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
 
   const trackId = currentTrack?.videoId || currentTrack?.id;
 
@@ -189,7 +225,17 @@ export const MusicPlayer = () => {
             setDuration(Math.floor(ytDur));
           }
 
-          if (typeof ytTime === 'number' && !isNaN(ytTime) && !isScrubbingRef.current) {
+          if (typeof ytTime === 'number' && !isNaN(ytTime)) {
+            if (isScrubbingRef.current) return;
+
+            if (pendingSeekRef.current !== null) {
+              if (Math.abs(ytTime - pendingSeekRef.current) <= 2) {
+                pendingSeekRef.current = null;
+                setCurrentTime(Math.floor(ytTime));
+              }
+              return;
+            }
+
             setCurrentTime(Math.floor(ytTime));
           }
 
@@ -239,6 +285,8 @@ export const MusicPlayer = () => {
 
     if (prevTrackIdRef.current && prevTrackIdRef.current !== trackId) {
       setCurrentTime(0);
+      setScrubTime(null);
+      pendingSeekRef.current = null;
       setIsPlaying(true);
       sendYTCommand('loadVideoById', [trackId]);
       if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
@@ -275,14 +323,19 @@ export const MusicPlayer = () => {
     const interval = setInterval(() => {
       if (isScrubbingRef.current) return;
 
-      sendYTCommand('listening');
-
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
         try {
           const cur = playerRef.current.getCurrentTime();
           const dur = playerRef.current.getDuration();
           if (typeof cur === 'number' && !isNaN(cur) && cur >= 0) {
-            setCurrentTime(Math.floor(cur));
+            if (pendingSeekRef.current !== null) {
+              if (Math.abs(cur - pendingSeekRef.current) <= 2) {
+                pendingSeekRef.current = null;
+                setCurrentTime(Math.floor(cur));
+              }
+            } else {
+              setCurrentTime(Math.floor(cur));
+            }
           }
           if (typeof dur === 'number' && !isNaN(dur) && dur > 0) {
             setDuration(Math.floor(dur));
@@ -347,61 +400,67 @@ export const MusicPlayer = () => {
     }
   };
 
+  // Helper sentral untuk commit seek ke posisi waktu yang dipilih
+  const commitSeek = (targetSec) => {
+    const dur = duration > 0 ? duration : (currentTrack?.durationSec || 100);
+    const validTarget = Math.max(0, Math.min(Math.round(targetSec), dur));
+
+    // 1. Perbarui state lokal secara instan agar slider & label waktu tidak jump
+    setCurrentTime(validTarget);
+    setScrubTime(null);
+    isScrubbingRef.current = false;
+
+    // 2. Kunci telemetry agar waktu lama dari YouTube yang sedang buffering tidak merusak slider
+    pendingSeekRef.current = validTarget;
+    if (seekTimeoutRef.current) {
+      clearTimeout(seekTimeoutRef.current);
+    }
+    seekTimeoutRef.current = setTimeout(() => {
+      pendingSeekRef.current = null;
+    }, 2000);
+
+    // 3. Kirim instruksi seekTo ke YouTube iframe via postMessage & YT API
+    sendYTCommand('seekTo', [validTarget, true]);
+    if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
+      try {
+        playerRef.current.seekTo(validTarget, true);
+      } catch {}
+    }
+  };
+
   // 9. Tombol Mundur 10 Detik
   const handleRewind10 = () => {
     const cur = scrubTime !== null ? scrubTime : currentTime;
-    const target = Math.max(0, cur - 10);
-    setCurrentTime(target);
-    sendYTCommand('seekTo', [target, true]);
-    if (playerRef.current?.seekTo) {
-      try { playerRef.current.seekTo(target, true); } catch {}
-    }
+    commitSeek(cur - 10);
   };
 
   // 10. Tombol Maju 10 Detik
   const handleForward10 = () => {
     const cur = scrubTime !== null ? scrubTime : currentTime;
-    const maxDur = duration > 0 ? duration : (cur + 10);
-    const target = Math.min(maxDur, cur + 10);
-    setCurrentTime(target);
-    sendYTCommand('seekTo', [target, true]);
-    if (playerRef.current?.seekTo) {
-      try { playerRef.current.seekTo(target, true); } catch {}
-    }
+    commitSeek(cur + 10);
   };
 
-  // 11. Scrubber / Slider Handler Anti-Macet & Anti-Jumping
-  const handleSeekStart = (e) => {
+  // 11. Scrubber / Slider Handler Presisi (Anti-Macet, Anti-Jumping & Bebas Bug)
+  const handleSeekPointerDown = (e) => {
     isScrubbingRef.current = true;
-    const val = Number(e.target.value);
-    setScrubTime(val);
-
-    const handlePointerUp = () => {
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('touchend', handlePointerUp);
-      window.removeEventListener('mouseup', handlePointerUp);
-
-      setScrubTime((latestScrub) => {
-        const commitTarget = latestScrub !== null ? latestScrub : currentTime;
-        setCurrentTime(commitTarget);
-        sendYTCommand('seekTo', [commitTarget, true]);
-        if (playerRef.current?.seekTo) {
-          try { playerRef.current.seekTo(commitTarget, true); } catch {}
-        }
-        setTimeout(() => {
-          isScrubbingRef.current = false;
-        }, 300);
-        return null;
-      });
-    };
-
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('touchend', handlePointerUp);
-    window.addEventListener('mouseup', handlePointerUp);
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch {}
   };
 
   const handleSeekChange = (e) => {
-    setScrubTime(Number(e.target.value));
+    const val = Number(e.target.value);
+    setScrubTime(val);
+  };
+
+  const handleSeekCommit = (e) => {
+    const val = Number(e.target.value);
+    try {
+      if (e.target.hasPointerCapture && e.target.hasPointerCapture(e.pointerId)) {
+        e.target.releasePointerCapture(e.pointerId);
+      }
+    } catch {}
+    commitSeek(val);
   };
 
   // 12. Kontrol Volume & Mute
@@ -448,43 +507,95 @@ export const MusicPlayer = () => {
   };
 
   const handleIframeLoad = () => {
-    sendYTCommand('listening');
-    sendYTCommand('setVolume', [volume]);
-    if (isMuted) {
-      sendYTCommand('mute');
-    } else {
-      sendYTCommand('unMute');
+    // Daftarkan listener telemetri postMessage dengan format top-level event resmi YouTube
+    const iframe = iframeRef.current || document.getElementById('zenvy-youtube-player-iframe');
+    if (iframe?.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage(JSON.stringify({ event: 'listening' }), '*');
+      } catch {}
     }
-    if (isPlaying) {
-      sendYTCommand('playVideo');
-    }
-    setupYTPlayer();
+
+    // Terapkan properti awal audio secara aman tanpa memicu crash API dispatcher
+    setTimeout(() => {
+      sendYTCommand('setVolume', [volume]);
+      if (isMuted) {
+        sendYTCommand('mute');
+      } else {
+        sendYTCommand('unMute');
+      }
+      if (isPlaying) {
+        sendYTCommand('playVideo');
+      }
+    }, 150);
   };
 
   if (!isPlayerOpen || !currentTrack) return null;
 
   const displayTime = scrubTime !== null ? scrubTime : currentTime;
-  const maxTime = duration > 0 ? duration : 100;
+  const effectiveDuration = duration > 0 ? duration : (currentTrack?.durationSec || 0);
+  const maxTime = effectiveDuration > 0 ? effectiveDuration : 100;
+  const progressPercent = maxTime > 0 ? Math.min(100, Math.max(0, (displayTime / maxTime) * 100)) : 0;
   const originParam = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
-  const iframeSrc = `https://www.youtube-nocookie.com/embed/${trackId}?enablejsapi=1&autoplay=1&playsinline=1&controls=1&origin=${originParam}`;
+  const iframeSrc = `https://www.youtube.com/embed/${trackId}?enablejsapi=1&autoplay=1&playsinline=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&iv_load_policy=3&origin=${originParam}`;
 
   return (
     <>
       <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
         
-        {/* Layar Video & Audio Player IFrame YouTube Terikat Permanen */}
+        {/* Layar Video Bersih & Terpadu (Tanpa Overlay Bawaan YouTube) */}
         <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-zenvy-border block" : "fixed -bottom-[9999px] -right-[9999px] w-[320px] h-[180px] pointer-events-none"}>
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-xl border border-zenvy-border">
+          <div 
+            ref={videoContainerRef} 
+            className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-2xl border border-zenvy-border group select-none"
+          >
             <iframe
               ref={iframeRef}
               id="zenvy-youtube-player-iframe"
               title={currentTrack.title}
               src={iframeSrc}
-              className="w-full h-full border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              className="w-full h-full border-0 pointer-events-none select-none"
+              tabIndex={-1}
+              allow="autoplay; encrypted-media; picture-in-picture"
               allowFullScreen
               onLoad={handleIframeLoad}
             />
+
+            {/* Overlay Interaktif (Bebas Overlay YouTube, Terhubung Langsung ke Panel Kontrol Musik) */}
+            <div
+              onClick={handleTogglePlay}
+              className="absolute inset-0 z-10 cursor-pointer flex items-center justify-center transition-colors hover:bg-black/20"
+              title={isPlaying ? "Klik untuk Menjeda" : "Klik untuk Memutar"}
+            >
+              {!isPlaying && (
+                <div className="w-16 h-16 rounded-full bg-zenvy-violet/90 text-white flex items-center justify-center shadow-2xl backdrop-blur-sm transition-transform hover:scale-110">
+                  <Play className="w-8 h-8 fill-current ml-1 text-white" />
+                </div>
+              )}
+            </div>
+
+            {/* Bar Kontrol Atas Video */}
+            <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 pointer-events-auto">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFullscreen();
+                }}
+                className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 text-zinc-300 hover:text-white border border-white/10 backdrop-blur-md transition shadow"
+                title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+              >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowVideo(false);
+                }}
+                className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 text-zinc-300 hover:text-white border border-white/10 backdrop-blur-md transition shadow"
+                title="Sembunyikan Video (Hanya Audio Musik)"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -573,7 +684,7 @@ export const MusicPlayer = () => {
               <button
                 onClick={handleRewind10}
                 className="p-1 rounded text-zinc-400 hover:text-white transition"
-                title="Mundur 10 Detik Video"
+                title="Mundur 10 Detik"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -593,7 +704,7 @@ export const MusicPlayer = () => {
               <button
                 onClick={handleForward10}
                 className="p-1 rounded text-zinc-400 hover:text-white transition"
-                title="Maju 10 Detik Video"
+                title="Maju 10 Detik"
               >
                 <RotateCw className="w-3.5 h-3.5" />
               </button>
@@ -609,21 +720,27 @@ export const MusicPlayer = () => {
               </button>
             </div>
 
-            {/* Time Scrubber Bar Terikat ke Video (Anti-Macet & Anti-Jumping) */}
+            {/* Time Scrubber Bar Terpadu (Anti-Macet, Anti-Jumping & Presisi 100%) */}
             <div className="w-full max-w-lg flex items-center gap-2 text-[11px] font-mono text-zinc-400">
               <span className="w-10 text-right">{formatTime(displayTime)}</span>
               <input
                 type="range"
                 min="0"
                 max={maxTime}
+                step="1"
                 value={Math.min(displayTime, maxTime)}
-                onPointerDown={handleSeekStart}
-                onTouchStart={handleSeekStart}
-                onMouseDown={handleSeekStart}
+                onPointerDown={handleSeekPointerDown}
+                onPointerUp={handleSeekCommit}
+                onTouchEnd={handleSeekCommit}
+                onMouseUp={handleSeekCommit}
                 onChange={handleSeekChange}
-                className="w-full h-1 bg-zenvy-border rounded-lg appearance-none cursor-pointer accent-white hover:accent-zinc-300 transition"
+                onKeyUp={handleSeekCommit}
+                style={{
+                  background: `linear-gradient(to right, #8b5cf6 ${progressPercent}%, #27272a ${progressPercent}%)`
+                }}
+                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-white hover:accent-zinc-200 transition-all"
               />
-              <span className="w-10 text-left">{formatTime(duration)}</span>
+              <span className="w-10 text-left">{formatTime(effectiveDuration)}</span>
             </div>
           </div>
 
@@ -635,17 +752,21 @@ export const MusicPlayer = () => {
               320k OPUS
             </span>
 
-            {/* Tombol Tampilkan Layar Video */}
+            {/* Tombol Tampilkan / Sembunyikan Layar Video */}
             <button
               onClick={() => setShowVideo(!showVideo)}
               className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition ${
                 showVideo
-                  ? 'bg-zenvy-cardElevated border-zinc-500 text-white'
+                  ? 'bg-zenvy-violet border-zenvy-violet text-white shadow-sm'
                   : 'bg-zenvy-card border-zenvy-border text-zinc-400 hover:text-white'
               }`}
-              title={showVideo ? 'Tutup Layar Video' : 'Buka Layar Video YouTube'}
+              title={showVideo ? 'Sembunyikan Layar Video (Hanya Musik)' : 'Buka Layar Video Bersih'}
             >
-              <Maximize2 className="w-3.5 h-3.5" />
+              {showVideo ? (
+                <Video className="w-3.5 h-3.5 text-white" />
+              ) : (
+                <VideoOff className="w-3.5 h-3.5" />
+              )}
             </button>
 
             {/* Pengatur Volume Suara */}

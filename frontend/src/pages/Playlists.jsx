@@ -27,6 +27,8 @@ export const Playlists = () => {
   const [newName, setNewName] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [playlistToDelete, setPlaylistToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const navigate = useNavigate();
   const { playTrack } = usePlayer();
@@ -47,6 +49,24 @@ export const Playlists = () => {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const confirmDeletePlaylist = async () => {
+    if (!playlistToDelete) return;
+    setDeleting(true);
+    try {
+      await playlistApi.delete(playlistToDelete.id);
+      const updated = playlists.filter(p => p.id !== playlistToDelete.id);
+      setPlaylists(updated);
+      if (selectedPlaylist?.id === playlistToDelete.id) {
+        setSelectedPlaylist(updated.length > 0 ? updated[0] : null);
+      }
+      setPlaylistToDelete(null);
+    } catch (err) {
+      console.error('Failed to delete playlist:', err);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -141,10 +161,10 @@ export const Playlists = () => {
               {playlists.map((pl) => {
                 const isSelected = selectedPlaylist?.id === pl.id;
                 return (
-                  <button
+                  <div
                     key={pl.id}
                     onClick={() => setSelectedPlaylist(pl)}
-                    className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 flex items-center justify-between ${
+                    className={`group w-full text-left p-3.5 rounded-xl border transition-all duration-200 flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? 'bg-zenvy-cardElevated border-zenvy-violet text-white shadow-md'
                         : 'bg-zenvy-card hover:bg-zenvy-cardElevated border-zenvy-border text-zinc-300'
@@ -163,8 +183,20 @@ export const Playlists = () => {
                         </p>
                       </div>
                     </div>
-                    <ArrowRight className={`w-4 h-4 flex-shrink-0 ${isSelected ? 'text-zenvy-violetSoft' : 'text-zinc-600'}`} />
-                  </button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlaylistToDelete(pl);
+                        }}
+                        className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition"
+                        title="Hapus playlist ini"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <ArrowRight className={`w-4 h-4 ${isSelected ? 'text-zenvy-violetSoft' : 'text-zinc-600'}`} />
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -219,6 +251,15 @@ export const Playlists = () => {
                       <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit Info & Sampul</span>
                     </Link>
+
+                    <button
+                      onClick={() => setPlaylistToDelete(selectedPlaylist)}
+                      className="px-3.5 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition"
+                      title="Hapus Playlist Ini"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Hapus Playlist</span>
+                    </button>
 
                     {selectedPlaylist.tracks && selectedPlaylist.tracks.length > 0 && (
                       <button
@@ -374,6 +415,46 @@ export const Playlists = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus Playlist */}
+      {playlistToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-zenvy-sidebar rounded-2xl p-6 border border-zenvy-border shadow-2xl relative space-y-4">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Hapus Playlist?</h3>
+                <p className="text-xs text-zenvy-muted">Tindakan ini tidak dapat dibatalkan.</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Apakah Anda yakin ingin menghapus playlist <strong className="text-white">"{playlistToDelete.name}"</strong>? Semua susunan lagu di dalamnya akan dihapus.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPlaylistToDelete(null)}
+                className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white"
+                disabled={deleting}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeletePlaylist}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow disabled:opacity-50"
+              >
+                {deleting ? 'Menghapus...' : 'Ya, Hapus Playlist'}
+              </button>
+            </div>
           </div>
         </div>
       )}

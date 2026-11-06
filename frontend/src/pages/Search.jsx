@@ -13,6 +13,7 @@ import {
 import { useSearchParams, Link } from 'react-router-dom';
 import { musicApi, favoritesApi, playlistApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
+import { useAuth } from '../context/AuthContext';
 import MusicCard from '../components/MusicCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -38,13 +39,14 @@ export const Search = () => {
   const [modalMusic, setModalMusic] = useState(null);
 
   const { playTrack } = usePlayer();
+  const { user } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       executeSearch(query);
     }, query ? 450 : 0);
     return () => clearTimeout(timer);
-  }, [query, activeTab]);
+  }, [query, activeTab, user]);
 
   const executeSearch = async (val) => {
     setLoading(true);

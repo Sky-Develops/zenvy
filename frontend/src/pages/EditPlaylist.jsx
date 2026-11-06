@@ -40,6 +40,8 @@ export const EditPlaylist = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Form states
   const [name, setName] = useState('');
@@ -117,6 +119,17 @@ export const EditPlaylist = () => {
 
   const removeTrack = (trackId) => {
     setTracks(tracks.filter(t => (t.videoId || t.id) !== trackId));
+  };
+
+  const handleDeletePlaylist = async () => {
+    setDeleting(true);
+    try {
+      await playlistApi.delete(id);
+      navigate('/playlists');
+    } catch (e) {
+      console.error(e);
+      setDeleting(false);
+    }
   };
 
   const isTrackInPlaylist = (track) => {
@@ -209,13 +222,22 @@ export const EditPlaylist = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {savedSuccess && (
             <span className="flex items-center gap-1.5 text-xs text-zinc-300 font-semibold bg-zenvy-card px-3 py-1.5 rounded-lg border border-zenvy-border">
               <Check className="w-4 h-4 text-emerald-400" />
               Perubahan Disimpan
             </span>
           )}
+
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="px-4 py-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition"
+            title="Hapus Playlist Ini"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Hapus Playlist</span>
+          </button>
 
           <button
             onClick={handleSave}
@@ -792,6 +814,46 @@ export const EditPlaylist = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Konfirmasi Hapus Playlist */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-sm bg-zenvy-sidebar rounded-2xl p-6 border border-zenvy-border shadow-2xl relative space-y-4">
+            <div className="flex items-center gap-3 text-red-400">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Hapus Playlist?</h3>
+                <p className="text-xs text-zenvy-muted">Tindakan ini tidak dapat dibatalkan.</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Apakah Anda yakin ingin menghapus playlist <strong className="text-white">"{name}"</strong>? Semua lagu yang tersusun di dalamnya akan dihapus dari koleksi playlist ini.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white"
+                disabled={deleting}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePlaylist}
+                disabled={deleting}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow disabled:opacity-50"
+              >
+                {deleting ? 'Menghapus...' : 'Ya, Hapus Playlist'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

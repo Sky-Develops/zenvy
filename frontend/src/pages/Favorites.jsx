@@ -3,6 +3,7 @@ import { Heart, Search, Play, Trash2, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { favoritesApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
+import { useAuth } from '../context/AuthContext';
 import MusicCard from '../components/MusicCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
@@ -15,10 +16,11 @@ export const Favorites = () => {
   const [modalMusic, setModalMusic] = useState(null);
 
   const { playTrack } = usePlayer();
+  const { user } = useAuth();
 
   useEffect(() => {
     loadFavorites();
-  }, []);
+  }, [user]);
 
   const loadFavorites = async () => {
     setLoading(true);

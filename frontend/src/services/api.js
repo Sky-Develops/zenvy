@@ -53,14 +53,36 @@ const getCatalog = () => {
   return stored;
 };
 
+// Helper untuk mendapatkan identitas unik user yang sedang aktif
+export const getCurrentUserKey = () => {
+  try {
+    const user = getStorage('zenvy_user', null);
+    if (user && (user.id || user.email)) {
+      return `user_${user.id || user.email.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_')}`;
+    }
+  } catch {}
+  return 'guest';
+};
+
+export const getFavoritesStorageKey = () => {
+  return `zenvy_favorites_${getCurrentUserKey()}`;
+};
+
 const getValidFavorites = () => {
-  const defaultFavs = [INITIAL_MOCK_MUSIC[0], INITIAL_MOCK_MUSIC[1], INITIAL_MOCK_MUSIC[2]];
-  const stored = getStorage('zenvy_favorites', null);
-  if (!stored || !Array.isArray(stored) || stored.some(s => s.id === 'jfKfPfyJRdk' || s.id === 'DWcJFNfaw90')) {
-    setStorage('zenvy_favorites', defaultFavs);
+  const key = getFavoritesStorageKey();
+  const stored = getStorage(key, null);
+  if (stored && Array.isArray(stored)) {
+    return stored;
+  }
+  // Akun kurator demo awal diberikan contoh, akun unik lainnya dimulai dari kosong
+  const userKey = getCurrentUserKey();
+  if (userKey.includes('admin') || userKey.includes('zenvy')) {
+    const defaultFavs = [INITIAL_MOCK_MUSIC[0], INITIAL_MOCK_MUSIC[1], INITIAL_MOCK_MUSIC[2]];
+    setStorage(key, defaultFavs);
     return defaultFavs;
   }
-  return stored;
+  setStorage(key, []);
+  return [];
 };
 
 const getValidPlaylists = () => {
@@ -176,12 +198,16 @@ export const authApi = {
       if (response.data?.token) {
         localStorage.setItem('zenvy_token', response.data.token);
       }
+      if (response.data?.user) {
+        localStorage.setItem('zenvy_user', JSON.stringify(response.data.user));
+      }
       return response.data;
     } catch (err) {
       if (!err.response) {
         const mockToken = 'mock_jwt_token_' + Date.now();
         const user = {
           ...INITIAL_MOCK_USER,
+          id: 'usr_' + credentials.email.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_'),
           email: credentials.email,
           username: credentials.email.split('@')[0] || 'Elena Vance'
         };
@@ -198,6 +224,9 @@ export const authApi = {
       const response = await apiClient.post('/auth/register', userData);
       if (response.data?.token) {
         localStorage.setItem('zenvy_token', response.data.token);
+      }
+      if (response.data?.user) {
+        localStorage.setItem('zenvy_user', JSON.stringify(response.data.user));
       }
       return response.data;
     } catch (err) {
@@ -220,7 +249,11 @@ export const authApi = {
   getCurrentUser: async () => {
     try {
       const response = await apiClient.get('/auth/me');
-      return response.data;
+      const userData = response.data?.user || response.data;
+      if (userData) {
+        localStorage.setItem('zenvy_user', JSON.stringify(userData));
+      }
+      return userData;
     } catch {
       return getStorage('zenvy_user', INITIAL_MOCK_USER);
     }
@@ -350,6 +383,10 @@ export const musicApi = {
 // ==========================================
 export const favoritesApi = {
   getAll: async () => {
+    const token = localStorage.getItem('zenvy_token');
+    if (!token) {
+      return getValidFavorites();
+    }
     try {
       const response = await apiClient.get('/favorites');
       return response.data?.items || response.data || [];
@@ -361,12 +398,20 @@ export const favoritesApi = {
   add: async (music) => {
     try {
       const response = await apiClient.post('/favorites', music);
-      return response.data;
-    } catch {
+      const key = getFavoritesStorageKey();
       const current = getValidFavorites();
-      if (!current.some(item => (item.videoId || item.id) === (music.videoId || music.id))) {
+      const trackId = music.videoId || music.id;
+      if (!current.some(item => (item.videoId || item.id) === trackId)) {
+        setStorage(key, [music, ...current]);
+      }
+      return response.data?.music || response.data || music;
+    } catch {
+      const key = getFavoritesStorageKey();
+      const current = getValidFavorites();
+      const trackId = music.videoId || music.id;
+      if (!current.some(item => (item.videoId || item.id) === trackId)) {
         const updated = [music, ...current];
-        setStorage('zenvy_favorites', updated);
+        setStorage(key, updated);
       }
       return music;
     }
@@ -375,11 +420,16 @@ export const favoritesApi = {
   remove: async (musicId) => {
     try {
       const response = await apiClient.delete(`/favorites/${musicId}`);
-      return response.data;
-    } catch {
+      const key = getFavoritesStorageKey();
       const current = getValidFavorites();
       const updated = current.filter(item => item.id !== musicId && item.videoId !== musicId);
-      setStorage('zenvy_favorites', updated);
+      setStorage(key, updated);
+      return response.data;
+    } catch {
+      const key = getFavoritesStorageKey();
+      const current = getValidFavorites();
+      const updated = current.filter(item => item.id !== musicId && item.videoId !== musicId);
+      setStorage(key, updated);
       return { success: true, removedId: musicId };
     }
   }
@@ -499,6 +549,18 @@ export const playlistApi = {
         }
         return pl;
       });
+      setStorage('zenvy_playlists', updated);
+      return { success: true };
+    }
+  },
+
+  delete: async (id) => {
+    try {
+      const response = await apiClient.delete(`/playlists/${id}`);
+      return response.data;
+    } catch {
+      const playlists = getValidPlaylists();
+      const updated = playlists.filter(pl => pl.id !== id);
       setStorage('zenvy_playlists', updated);
       return { success: true };
     }

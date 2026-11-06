@@ -240,7 +240,7 @@ export const MusicDetail = () => {
               </button>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-white px-3 py-1 rounded-full bg-black/70 border border-white/20 shadow">
-                  {isCurrentActive && isPlaying ? 'Sedang Berputar di Panel Bawah' : 'Klik untuk Memutar Audio & Video'}
+                  {isCurrentActive && isPlaying ? 'Sedang Berputar di Panel Bawah' : 'Klik untuk Memutar Musik'}
                 </span>
               </div>
             </div>

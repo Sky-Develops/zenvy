@@ -14,6 +14,10 @@ users.push({
   createdAt: new Date().toISOString()
 });
 
+// In-Memory User Favorites Store terikat unik per userId: { [userId]: [tracks] }
+const userFavorites = {};
+
 module.exports = {
-  users
+  users,
+  userFavorites
 };

@@ -39,7 +39,7 @@ export const Home = () => {
 
   useEffect(() => {
     fetchInitialData();
-  }, []);
+  }, [user]);
 
   const fetchInitialData = async () => {
     setLoading(true);

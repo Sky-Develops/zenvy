@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
@@ -6,7 +7,7 @@ import Sidebar from '../components/Sidebar';
 describe('Sidebar Component', () => {
   it('renders ZENVY brand and tagline', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Sidebar onOpenOmnibar={() => {}} />
       </BrowserRouter>
     );
@@ -17,7 +18,7 @@ describe('Sidebar Component', () => {
 
   it('contains navigation links for Beranda, Jelajahi, Cari, and Playlist', () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Sidebar onOpenOmnibar={() => {}} />
       </BrowserRouter>
     );

@@ -9,6 +9,7 @@ if (typeof process.loadEnvFile === 'function') {
 
 const express = require('express');
 const authRoutes = require('./routes/auth');
+const favoritesRoutes = require('./routes/favorites');
 
 const app = express();
 
@@ -34,8 +35,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Mount Authentication Routes
+// Mount Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/favorites', favoritesRoutes);
 
 // Server hanya dijalankan jika file ini dieksekusi langsung
 if (require.main === module) {

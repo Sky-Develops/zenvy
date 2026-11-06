@@ -11,6 +11,7 @@ import MusicCard from '../components/MusicCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AddToPlaylistModal from '../components/AddToPlaylistModal';
 import { musicApi, favoritesApi } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { SONIC_HABITATS } from '../services/mockData';
 
 const FREQUENCY_CATEGORIES = [
@@ -31,10 +32,11 @@ export const Explore = () => {
   const [loading, setLoading] = useState(true);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [modalMusic, setModalMusic] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     loadExploreData();
-  }, [activeCategory]);
+  }, [activeCategory, user]);
 
   const loadExploreData = async () => {
     setLoading(true);
