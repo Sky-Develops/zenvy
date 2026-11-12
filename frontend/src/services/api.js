@@ -46,7 +46,7 @@ const setStorage = (key, value) => {
 // Pembersihan cache lagu lama jika pernah tersimpan placeholder yang tidak aktif
 const getCatalog = () => {
   const stored = getStorage('zenvy_music_catalog', null);
-  if (!stored || !Array.isArray(stored) || stored.some(s => s.id === 'jfKfPfyJRdk' || s.id === 'DWcJFNfaw90' || s.id === '5qap5aO4i9A')) {
+  if (!stored || !Array.isArray(stored) || stored.length < INITIAL_MOCK_MUSIC.length || stored.some(s => s.id === 'DWcJFNfaw90' || s.id === '5qap5aO4i9A')) {
     setStorage('zenvy_music_catalog', INITIAL_MOCK_MUSIC);
     return INITIAL_MOCK_MUSIC;
   }
@@ -276,8 +276,28 @@ export const musicApi = {
       return catalog;
     }
 
+    // 1. Coba panggil Backend API /music/search?q=... (pencarian YouTube langsung tanpa batasan kuota API key)
     try {
-      // 1. Panggil YouTube Data API v3 resmi dengan API key pengguna
+      const res = await apiClient.get('/music/search', { params: { q: query }, timeout: 8000 });
+      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        saveTracksToCache(res.data);
+        return res.data;
+      }
+    } catch (backendErr) {
+      // Jika backend port 5000 offline, coba endpoint middleware dev server
+      try {
+        const localRes = await axios.get('/api/music/search', { params: { q: query }, timeout: 8000 });
+        if (localRes.data && Array.isArray(localRes.data) && localRes.data.length > 0) {
+          saveTracksToCache(localRes.data);
+          return localRes.data;
+        }
+      } catch (devErr) {
+        // Lanjut ke fallback berikutnya
+      }
+    }
+
+    // 2. Coba panggil YouTube Data API v3 resmi jika API key pengguna tersedia
+    try {
       const ytUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=16&type=video&videoEmbeddable=true&q=${encodeURIComponent(query)}&key=${YOUTUBE_API_KEY}`;
       const ytRes = await axios.get(ytUrl, { timeout: 8000 });
 
@@ -294,7 +314,7 @@ export const musicApi = {
       console.warn('YouTube API search error / quota notice:', ytErr.message || ytErr);
     }
 
-    // 2. Fallback: Cari di katalog lokal & track cache
+    // 3. Fallback: Cari di katalog lokal & track cache
     const cache = getTrackCache();
     const all = [...catalog, ...Object.values(cache)];
     const qLower = query.toLowerCase();
@@ -316,22 +336,8 @@ export const musicApi = {
       });
     }
 
-    // 3. Fallback cerdas dengan verified playable videos
-    const cleanTitle = query.charAt(0).toUpperCase() + query.slice(1);
-    return [
-      {
-        ...INITIAL_MOCK_MUSIC[0],
-        title: `${cleanTitle} - Sesi Eksplorasi Gelombang Frekuensi`,
-        channelTitle: `${cleanTitle} Audio Labs`,
-        description: `Kurasi audio resolusi tinggi untuk kata kunci pencarian "${query}". Siap diputar dengan audio lossless.`
-      },
-      {
-        ...INITIAL_MOCK_MUSIC[1],
-        title: `${cleanTitle} - Instrumental & Night Mix`,
-        channelTitle: 'ZENVY Acoustic Labs',
-        description: `Kompilasi nada santai beresolusi tinggi yang terinspirasi oleh ${query}.`
-      }
-    ];
+    // 4. Jika tidak ditemukan, kembalikan array kosong agar UI menampilkan EmptyState asli (tidak membuat placeholder palsu)
+    return [];
   },
 
   getDetail: async (id) => {
@@ -365,10 +371,10 @@ export const musicApi = {
     return {
       id,
       videoId: id,
-      title: `Frekuensi ZENVY: ${id}`,
+      title: `Musik ZENVY: ${id}`,
       channelTitle: 'YouTube Music',
       thumbnailUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
-      description: 'Detail data frekuensi musik untuk video ' + id,
+      description: 'Detail data musik untuk video ' + id,
       bpm: 80,
       musicalKey: 'F# Minor',
       lufs: '-14.0 LUFS',
@@ -469,7 +475,7 @@ export const playlistApi = {
         name,
         description,
         isPublic: true,
-        frequencyPreset: "432 Hz Resonansi",
+        frequencyPreset: "Fokus & Belajar",
         moodTags: ["Fokus", "Belajar"],
         coverUrl: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=80",
         tracks: []

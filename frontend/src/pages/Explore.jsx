@@ -1,27 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Flame, Radio, ArrowUpRight } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import MusicCard from '../components/MusicCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import AddToPlaylistModal from '../components/AddToPlaylistModal';
 import { musicApi, favoritesApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { SONIC_HABITATS } from '../services/mockData';
 
-const FREQUENCY_CATEGORIES = [
-  'Semua',
-  'Elektronik & Dark Wave',
-  'Ambient & Lo-Fi',
-  'Synthwave',
-  'Indie Chill & Akustik',
-  'Fokus Mendalam & Belajar'
-];
+const MUSIC_CATEGORIES = ['All', 'Lo-Fi', 'Synthwave', 'Acoustic', 'Ambient', 'Electronic'];
 
 export const Explore = () => {
   const [searchParams] = useSearchParams();
-  const initialHabitat = searchParams.get('habitat') || 'Semua';
+  const initialCategory = searchParams.get('genre') || searchParams.get('category') || 'All';
 
-  const [activeCategory, setActiveCategory] = useState(initialHabitat);
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [favoriteIds, setFavoriteIds] = useState(new Set());
@@ -36,7 +28,7 @@ export const Explore = () => {
     setLoading(true);
     try {
       const [musicList, favList] = await Promise.all([
-        musicApi.search(activeCategory === 'Semua' ? '' : activeCategory),
+        musicApi.search(activeCategory === 'All' ? '' : activeCategory),
         favoritesApi.getAll().catch(() => [])
       ]);
       setTracks(musicList);
@@ -67,32 +59,25 @@ export const Explore = () => {
   };
 
   return (
-    <div className="space-y-10 max-w-[1600px] mx-auto px-4 sm:px-8 py-6">
+    <div className="space-y-8 max-w-[1600px] mx-auto px-4 sm:px-8 py-6">
       
-      {/* Header Jelajahi */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zenvy-card border border-zenvy-border text-xs text-zinc-300 font-medium">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Radar Penemuan Global Aktif</span>
-        </div>
+      {/* Header Explore */}
+      <div className="space-y-1">
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Jelajahi Suasana Suara & Lingkungan
+          Explore Music
         </h1>
-        <p className="text-sm text-zenvy-muted max-w-2xl">
-          Selami gelombang frekuensi kurasi, penyelarasan harmonik 432 Hz, dan karya eksperimental berkualitas tinggi.
-        </p>
       </div>
 
-      {/* Filter Kategori & Genre Cepat */}
+      {/* Genre Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-        {FREQUENCY_CATEGORIES.map((cat) => (
+        {MUSIC_CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 border ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors duration-200 ${
               activeCategory === cat
-                ? 'bg-zenvy-violet text-white border-zenvy-violet shadow-md shadow-zenvy-violet/30'
-                : 'bg-zenvy-card hover:bg-zenvy-cardElevated text-zinc-300 border-zenvy-border'
+                ? 'bg-zenvy-primary text-white font-bold shadow-lg shadow-emerald-500/20'
+                : 'bg-[#1C1C1F] hover:bg-[#25252A] text-zinc-300'
             }`}
           >
             {cat}
@@ -100,65 +85,30 @@ export const Explore = () => {
         ))}
       </div>
 
-      {/* Grid Suasana Suara & Lingkungan */}
-      <section className="space-y-4">
+      {/* Popular Tracks Section */}
+      <section className="space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-            <Radio className="w-5 h-5 text-zenvy-violetSoft" />
-            <span>Suasana Suara & Lingkungan Populer</span>
-          </h2>
-          <span className="text-xs text-zenvy-muted">4 Suasana Tersedia</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {SONIC_HABITATS.map((hab) => (
-            <div
-              key={hab.id}
-              onClick={() => setActiveCategory(hab.name)}
-              className="group relative rounded-xl p-5 bg-zenvy-card hover:bg-zenvy-cardElevated border border-zenvy-border cursor-pointer transition-all duration-200 shadow-lg flex flex-col justify-between h-40"
-            >
-              <div>
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
-                  {hab.activeListeners}
-                </span>
-                <h3 className="text-base font-bold text-white mt-1 group-hover:text-zenvy-violetSoft transition">
-                  {hab.name}
-                </h3>
-                <p className="text-xs text-zenvy-muted mt-0.5">{hab.tagline}</p>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-zenvy-border/50 text-xs text-zinc-400">
-                <span>{hab.tracksCount} trek nada</span>
-                <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-white transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center shadow-sm">
+              <Flame className="w-4 h-4" />
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Sedang Tren & Terpopuler */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-              <Flame className="w-5 h-5 text-orange-400" />
-              <span>{activeCategory === 'Semua' ? 'Sedang Tren & Terpopuler' : `Suasana: ${activeCategory}`}</span>
+            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+              {activeCategory === 'All' ? 'Trending & Popular Tracks' : `Genre: ${activeCategory}`}
             </h2>
-            <p className="text-xs text-zenvy-muted">Aliran audio berkualitas tinggi dengan metrik momentum mingguan</p>
           </div>
-          <span className="text-xs text-zinc-400">{tracks.length} trek</span>
+          <span className="text-xs text-zenvy-muted font-mono">{tracks.length} tracks found</span>
         </div>
 
         {loading ? (
-          <LoadingSpinner message="Menyintesis katalog trek..." size="lg" />
+          <LoadingSpinner message="Browsing music catalog..." size="lg" />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-5">
-            {tracks.map((track) => {
-              const trackId = track.videoId || track.id;
+            {tracks.map((music) => {
+              const trackId = music.videoId || music.id;
               return (
                 <MusicCard
                   key={trackId}
-                  music={track}
+                  music={music}
                   isFavorite={favoriteIds.has(trackId)}
                   onToggleFavorite={handleToggleFavorite}
                   onAddToPlaylist={(t) => setModalMusic(t)}

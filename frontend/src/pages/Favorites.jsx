@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart, Search, Play } from 'lucide-react';
 
 import { favoritesApi } from '../services/api';
@@ -17,6 +18,7 @@ export const Favorites = () => {
 
   const { playTrack } = usePlayer();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadFavorites();
@@ -59,64 +61,63 @@ export const Favorites = () => {
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-8 py-6 space-y-8">
       
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-red-500/10 via-zenvy-card to-zenvy-obsidian border border-zenvy-border">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400 shadow-lg shadow-red-500/10">
-            <Heart className="w-7 h-7 fill-current" />
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Frekuensi Favorit Anda</h1>
-            <p className="text-xs sm:text-sm text-zenvy-muted mt-1">
-              {favorites.length} gelombang frekuensi yang Anda simpan untuk akses instan.
-            </p>
-          </div>
-        </div>
+      {/* Immersive Header Banner with Ambient Glow in Top-Right Corner */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-red-950/30 via-[#1C1C1F] to-[#121214] p-6 sm:p-8 shadow-2xl">
+        <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-red-500/15 filter blur-3xl pointer-events-none" />
 
-        {favorites.length > 0 && (
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <button
-              onClick={handlePlayAll}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold shadow-lg shadow-zenvy-violet/25 hover:scale-105 transition"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>Putar Semua Favorit</span>
-            </button>
+            <Heart className="w-7 h-7 text-red-500 fill-current flex-shrink-0" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Liked Songs</h1>
           </div>
-        )}
+
+          {favorites.length > 0 && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handlePlayAll}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zenvy-primary hover:bg-emerald-600 text-white text-xs font-bold shadow-lg transition-colors duration-200"
+              >
+                <Play className="w-4 h-4 fill-current text-white" />
+                <span>Play All Liked Songs</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Filter lokal dalam Favorit */}
+      {/* Search within Liked Songs */}
       {favorites.length > 0 && (
         <div className="relative max-w-md">
-          <Search className="w-4 h-4 text-zenvy-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400">
+            <Search className="w-4 h-4" />
+          </div>
           <input
             type="text"
-            placeholder="Cari dalam daftar favorit tersimpan..."
+            placeholder="Search within liked songs..."
             value={filterQuery}
             onChange={(e) => setFilterQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 text-xs rounded-lg bg-zenvy-card border border-zenvy-border text-white placeholder-zinc-500 focus:outline-none focus:border-zenvy-violet"
+            className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl bg-[#1C1C1F] text-zenvy-text placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zenvy-primary shadow-inner"
           />
         </div>
       )}
 
-      {/* Konten */}
+      {/* Content */}
       {loading ? (
-        <LoadingSpinner message="Memuat daftar frekuensi favorit..." size="lg" />
+        <LoadingSpinner message="Loading your liked songs..." size="lg" />
       ) : favorites.length === 0 ? (
         <EmptyState
           icon={Heart}
-          title="Belum Ada Lagu Favorit"
-          description="Anda belum menyimpan frekuensi musik apa pun. Klik ikon hati pada kartu lagu saat menjelajah untuk menyimpannya di sini."
-          actionLabel="Jelajahi Suasana"
-          onAction={() => window.location.href = '/explore'}
+          title="No Liked Songs Yet"
+          description="You haven't liked any songs yet. Click the heart icon on any track to save it to your library."
+          actionLabel="Explore Music"
+          onAction={() => navigate('/explore')}
         />
       ) : filteredFavorites.length === 0 ? (
         <EmptyState
           icon={Search}
-          title="Tidak Ada yang Cocok"
-          description={`Tidak ada lagu favorit yang cocok dengan kata kunci "${filterQuery}".`}
-          actionLabel="Bersihkan Filter"
+          title="No Matches Found"
+          description={`No liked songs match your search for "${filterQuery}".`}
+          actionLabel="Clear Filter"
           onAction={() => setFilterQuery('')}
         />
       ) : (

@@ -8,7 +8,7 @@ import {
   FolderPlus,
   ArrowRight,
   Edit3,
-  Globe,
+  Users,
   Lock,
   X
 } from 'lucide-react';
@@ -98,11 +98,9 @@ export const Playlists = () => {
       );
       const updatedPlaylist = { ...selectedPlaylist, tracks: updatedTracks };
       setSelectedPlaylist(updatedPlaylist);
-      setPlaylists(prev =>
-        prev.map(p => (p.id === selectedPlaylist.id ? updatedPlaylist : p))
-      );
+      setPlaylists(prev => prev.map(p => p.id === selectedPlaylist.id ? updatedPlaylist : p));
     } catch (err) {
-      console.error(err);
+      console.error('Failed to remove track:', err);
     }
   };
 
@@ -115,85 +113,113 @@ export const Playlists = () => {
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-8 py-6 space-y-8">
       
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-purple-900/30 via-zenvy-card to-zenvy-obsidian border border-zenvy-border">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-center text-zinc-300 shadow-lg">
-            <ListMusic className="w-7 h-7" />
+      {/* Immersive Header Banner with Ambient Glow in Top-Right Corner */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-950/40 via-[#1C1C1F] to-[#121214] p-6 sm:p-8 shadow-2xl">
+        <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-emerald-500/15 filter blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <ListMusic className="w-7 h-7 text-zenvy-primary flex-shrink-0" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Playlists</h1>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Playlist Kurasi Anda</h1>
-            <p className="text-xs sm:text-sm text-zenvy-muted mt-1">
-              Kelola dan susun frekuensi nada untuk berbagai kondisi fokus, belajar, dan relaksasi.
-            </p>
-          </div>
-        </div>
 
-        <button
-          onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold shadow-lg shadow-zenvy-violet/25 hover:scale-105 transition"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Buat Playlist Baru</span>
-        </button>
+          <button
+            onClick={() => navigate('/playlist/create')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zenvy-primary hover:bg-emerald-600 text-white text-xs font-bold shadow-lg transition-colors duration-200"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Playlist</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
-        <LoadingSpinner message="Memuat koleksi playlist..." size="lg" />
+        <LoadingSpinner message="Loading your playlists..." size="lg" />
       ) : playlists.length === 0 ? (
         <EmptyState
           icon={FolderPlus}
-          title="Belum Ada Playlist"
-          description="Buat playlist pertama Anda untuk mengorganisir frekuensi nada dan lagu-lagu favorit."
-          actionLabel="Buat Playlist"
-          onAction={() => setIsCreateOpen(true)}
+          title="No Playlists Yet"
+          description="Create your first playlist to organize and collect your favorite music tracks."
+          actionLabel="Create Playlist"
+          onAction={() => navigate('/playlist/create')}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Kolom Kiri: Pemilih Playlist */}
+          {/* Left Column: Playlist Selector Cards */}
           <div className="lg:col-span-4 space-y-3">
-            <h3 className="text-xs font-bold text-zenvy-muted uppercase tracking-wider px-1">
-              Semua Koleksi ({playlists.length})
-            </h3>
-            <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-bold text-zenvy-muted uppercase tracking-wider">
+                Your Collections ({playlists.length})
+              </h3>
+            </div>
+
+            <div className="space-y-2.5">
               {playlists.map((pl) => {
                 const isSelected = selectedPlaylist?.id === pl.id;
                 return (
                   <div
                     key={pl.id}
                     onClick={() => setSelectedPlaylist(pl)}
-                    className={`group w-full text-left p-3.5 rounded-xl border transition-all duration-200 flex items-center justify-between cursor-pointer ${
+                    className={`group relative w-full text-left p-3 rounded-2xl transition-colors duration-200 flex items-center justify-between cursor-pointer overflow-hidden ${
                       isSelected
-                        ? 'bg-zenvy-cardElevated border-zenvy-violet text-white shadow-md'
-                        : 'bg-zenvy-card hover:bg-zenvy-cardElevated border-zenvy-border text-zinc-300'
+                        ? 'bg-[#25252B] shadow-xl'
+                        : 'bg-[#1C1C1F] hover:bg-[#222226]'
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0 pr-2">
-                      <img
-                        src={pl.coverUrl || 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=400&q=80'}
-                        alt={pl.name}
-                        className="w-11 h-11 rounded-lg object-cover flex-shrink-0"
-                      />
+                    {/* Corner glow */}
+                    <div className="absolute -top-6 -right-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
+
+                    <div className="flex items-center gap-3.5 min-w-0 pr-2 relative z-10">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-black shadow-md">
+                        <img
+                          src={pl.coverUrl || 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=400&q=80'}
+                          alt={pl.name}
+                          className="w-full h-full object-cover"
+                        />
+                        {isSelected && (
+                          <div className="absolute inset-0 bg-emerald-500/20 backdrop-blur-[1px] flex items-center justify-center">
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                          </div>
+                        )}
+                      </div>
                       <div className="min-w-0">
-                        <h4 className="font-semibold text-xs sm:text-sm truncate">{pl.name}</h4>
-                        <p className="text-[11px] text-zenvy-muted truncate mt-0.5">
-                          {pl.tracks?.length || 0} trek • {pl.frequencyPreset || '432 Hz'}
-                        </p>
+                        <h4 className={`font-semibold text-xs sm:text-sm truncate ${isSelected ? 'text-white' : 'text-zinc-200 group-hover:text-white'}`}>
+                          {pl.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] text-zenvy-muted">
+                            {pl.tracks?.length || 0} tracks
+                          </span>
+                          <span className="text-[10px] text-zinc-500">•</span>
+                          <span className="text-[10px] text-zinc-400">
+                            {pl.isPublic ? 'Public' : 'Private'}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
+
+                    <div className="flex items-center gap-1 flex-shrink-0 relative z-10">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setPlaylistToDelete(pl);
                         }}
-                        className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition"
-                        title="Hapus playlist ini"
+                        className="w-7 h-7 rounded-lg bg-[#27272B] text-zinc-400 hover:text-red-400 hover:bg-red-500/15 flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-sm"
+                        title="Delete playlist"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
-                      <ArrowRight className={`w-4 h-4 ${isSelected ? 'text-zenvy-violetSoft' : 'text-zinc-600'}`} />
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isSelected ? 'text-emerald-400 bg-emerald-500/15' : 'text-zinc-500'}`}>
+                        <ArrowRight className="w-4 h-4" />
+                      </div>
+                    </div>
+
+                    {/* Hover glowing bottom outline: thick & luminous in the center, tapering to left and right */}
+                    <div className="absolute -bottom-[1px] inset-x-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute w-3/4 h-2 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent blur-sm" />
+                      <div className="absolute w-1/2 h-1 bg-gradient-to-r from-transparent via-emerald-300 to-transparent blur-[1px]" />
+                      <div className="relative w-full h-[1.5px] bg-gradient-to-r from-transparent via-emerald-400 via-50% to-transparent" />
                     </div>
                   </div>
                 );
@@ -201,125 +227,140 @@ export const Playlists = () => {
             </div>
           </div>
 
-          {/* Kolom Kanan: Detail Playlist Terpilih */}
-          <div className="lg:col-span-8 bg-zenvy-card rounded-2xl p-6 sm:p-8 border border-zenvy-border space-y-6">
+          {/* Right Column: Immersive Playlist Detailed View */}
+          <div className="lg:col-span-8 relative rounded-3xl overflow-hidden bg-[#1C1C1F] p-6 sm:p-8 space-y-6 shadow-2xl">
+            {/* Glow in top-right corner inside the card */}
+            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-emerald-500/15 filter blur-3xl pointer-events-none" />
+
             {selectedPlaylist ? (
-              <>
-                {/* Header Playlist */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zenvy-border">
-                  <div className="flex items-start gap-4">
-                    <img
-                      src={selectedPlaylist.coverUrl || 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80'}
-                      alt={selectedPlaylist.name}
-                      className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover border border-zenvy-border shadow-xl flex-shrink-0"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-[10px] font-bold text-zinc-300 uppercase px-2 py-0.5 rounded bg-zenvy-card border border-zenvy-border">
-                          {selectedPlaylist.frequencyPreset || '432 Hz Resonansi'}
+              <div className="relative z-10 space-y-6">
+                {/* Playlist Showcase Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6">
+                  <div className="flex items-start gap-5">
+                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden shadow-2xl flex-shrink-0 group bg-black">
+                      <img
+                        src={selectedPlaylist.coverUrl || 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=600&q=80'}
+                        alt={selectedPlaylist.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {selectedPlaylist.tracks && selectedPlaylist.tracks.length > 0 && (
+                        <button
+                          onClick={handlePlayAll}
+                          className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-zenvy-primary text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-colors duration-200 shadow-2xl hover:bg-emerald-600"
+                          title="Play All Tracks"
+                        >
+                          <Play className="w-5 h-5 fill-current ml-0.5 text-white" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 flex items-center gap-1">
+                          PLAYLIST
                         </span>
-                        <span className="text-[10px] text-zinc-400 flex items-center gap-1">
-                          {selectedPlaylist.isPublic ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                          {selectedPlaylist.isPublic ? 'Publik' : 'Privat'}
+                        <span className="px-2 py-0.5 rounded-md text-[10px] text-zinc-300 bg-[#25252B] flex items-center gap-1.5">
+                          {selectedPlaylist.isPublic ? <Users className="w-3 h-3 text-emerald-400" /> : <Lock className="w-3 h-3 text-zinc-400" />}
+                          <span>{selectedPlaylist.isPublic ? 'Public' : 'Private'}</span>
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-400">
+                          {selectedPlaylist.tracks?.length || 0} tracks
                         </span>
                       </div>
 
-                      <h2 className="text-xl sm:text-2xl font-bold text-white">
+                      <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                         {selectedPlaylist.name}
                       </h2>
-                      <p className="text-xs text-zenvy-muted mt-1 leading-relaxed max-w-xl">
-                        {selectedPlaylist.description || 'Tidak ada deskripsi tambahan.'}
+                      <p className="text-xs text-zenvy-muted leading-relaxed max-w-xl">
+                        {selectedPlaylist.description || 'No description provided.'}
                       </p>
                     </div>
                   </div>
 
-                  {/* Tombol Tindakan */}
+                  {/* Actions */}
                   <div className="flex items-center gap-2 flex-wrap">
+                    {selectedPlaylist.tracks && selectedPlaylist.tracks.length > 0 && (
+                      <button
+                        onClick={handlePlayAll}
+                        className="px-4 py-2.5 rounded-xl bg-zenvy-primary text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-600 transition-colors duration-200 shadow-lg shadow-emerald-950/30"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current text-white" />
+                        <span>Play All</span>
+                      </button>
+                    )}
+
                     <Link
                       to={`/playlist/${selectedPlaylist.id}/edit`}
-                      className="px-3.5 py-2 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow"
+                      className="px-3.5 py-2.5 rounded-xl bg-[#25252B] hover:bg-[#303036] text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Tambah Lagu</span>
+                      <span>Add Tracks</span>
                     </Link>
 
                     <Link
                       to={`/playlist/${selectedPlaylist.id}/edit`}
-                      className="px-3.5 py-2 rounded-lg bg-zenvy-cardElevated hover:bg-zenvy-border border border-zenvy-border text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                      className="px-3.5 py-2.5 rounded-xl bg-[#25252B] hover:bg-[#303036] text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
-                      <span>Edit Info & Sampul</span>
+                      <span>Edit Details</span>
                     </Link>
 
                     <button
                       onClick={() => setPlaylistToDelete(selectedPlaylist)}
-                      className="px-3.5 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition"
-                      title="Hapus Playlist Ini"
+                      className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
+                      title="Delete this playlist"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      <span>Hapus Playlist</span>
                     </button>
-
-                    {selectedPlaylist.tracks && selectedPlaylist.tracks.length > 0 && (
-                      <button
-                        onClick={handlePlayAll}
-                        className="px-4 py-2 rounded-lg bg-white text-black text-xs font-bold flex items-center gap-1.5 hover:scale-105 transition shadow"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-current text-black" />
-                        <span>Putar Semua</span>
-                      </button>
-                    )}
                   </div>
                 </div>
 
-                {/* Daftar Trek Lagu */}
+                {/* Track List inside Playlist */}
                 {selectedPlaylist.tracks?.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {selectedPlaylist.tracks.map((track, idx) => {
                       const trackId = track.videoId || track.id;
                       return (
                         <div
                           key={trackId || idx}
-                          className="group flex items-center justify-between p-2.5 rounded-xl bg-zenvy-obsidian hover:bg-zenvy-cardElevated border border-zenvy-border transition"
+                          className="group flex items-center justify-between p-2.5 rounded-xl bg-[#141416] hover:bg-[#222226] transition-colors"
                         >
                           <div className="flex items-center gap-3.5 min-w-0 pr-4">
-                            <span className="text-xs text-zinc-500 w-4 text-center font-mono">
+                            <span className="text-xs text-zinc-500 w-5 text-center font-mono">
                               {idx + 1}
                             </span>
-                            <img
-                              src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
-                              alt={track.title}
-                              className="w-10 h-10 rounded-md object-cover flex-shrink-0"
-                            />
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-black flex-shrink-0">
+                              <img
+                                src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
+                                alt={track.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
                             <div className="min-w-0">
                               <Link
                                 to={`/music/${trackId}`}
-                                className="block text-xs sm:text-sm font-semibold text-white hover:text-zenvy-violetSoft truncate"
+                                className="block text-xs sm:text-sm font-semibold text-white hover:text-zenvy-primary truncate"
                               >
                                 {track.title}
                               </Link>
-                              <div className="flex items-center gap-2 text-[11px] text-zenvy-muted mt-0.5">
-                                <span className="truncate">{track.channelTitle}</span>
-                                <span>•</span>
-                                <span className="font-mono text-zinc-400">{track.musicalKey || 'F# Minor'}</span>
-                                <span>•</span>
-                                <span className="font-mono text-zinc-400">{track.bpm || 80} BPM</span>
-                              </div>
+                              <p className="text-[11px] text-zenvy-muted truncate mt-0.5">
+                                {track.channelTitle || 'Artist'}
+                              </p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => playTrack(track)}
-                              className="p-2 rounded-lg text-zinc-300 hover:text-white hover:bg-zenvy-violet/20"
-                              title="Putar"
+                              className="w-8 h-8 rounded-lg bg-zenvy-primary text-white hover:bg-emerald-300 flex items-center justify-center transition-colors duration-200 shadow-md font-bold"
+                              title="Play"
                             >
-                              <Play className="w-3.5 h-3.5 fill-current" />
+                              <Play className="w-3.5 h-3.5 fill-current text-white ml-0.5" />
                             </button>
                             <button
                               onClick={() => handleRemoveTrack(trackId)}
-                              className="p-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10"
-                              title="Hapus trek"
+                              className="w-8 h-8 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 flex items-center justify-center transition"
+                              title="Remove track"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -329,41 +370,47 @@ export const Playlists = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-12 space-y-3">
-                    <Music className="w-10 h-10 text-zinc-600 mx-auto" />
-                    <h4 className="text-sm font-semibold text-white">Playlist ini masih kosong</h4>
+                  <div className="text-center py-16 space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[#25252B] flex items-center justify-center text-zinc-500 mx-auto">
+                      <Music className="w-6 h-6" />
+                    </div>
+                    <h4 className="text-sm font-semibold text-white">This playlist is empty</h4>
                     <p className="text-xs text-zenvy-muted max-w-sm mx-auto">
-                      Tambahkan lagu dari daftar favorit Anda, cari lagu YouTube baru, atau gunakan rekomendasi cerdas.
+                      Add tracks from your Liked Songs or discover new tracks across the library.
                     </p>
                     <Link
                       to={`/playlist/${selectedPlaylist.id}/edit`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold mt-2 shadow"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zenvy-primary hover:bg-emerald-400 text-white text-xs font-bold mt-2 shadow"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Tambah Lagu Sekarang</span>
+                      <span>Add Tracks Now</span>
                     </Link>
                   </div>
                 )}
-              </>
+              </div>
             ) : (
-              <p className="text-sm text-zenvy-muted text-center py-12">Pilih salah satu playlist</p>
+              <p className="text-sm text-zenvy-muted text-center py-16">Select a playlist to view tracks</p>
             )}
           </div>
         </div>
       )}
 
-      {/* Modal Buat Playlist Baru */}
+      {/* Modal: Create New Playlist with Frosted Backdrop */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md bg-zenvy-sidebar rounded-2xl p-6 border border-zenvy-border shadow-2xl relative">
-            <div className="flex items-center justify-between pb-3 border-b border-zenvy-border">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xl animate-fade-in">
+          <div className="w-full max-w-md bg-[#1C1C1F] rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+            {/* Glow in top-right corner of card */}
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex items-center justify-between pb-3 relative z-10">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <FolderPlus className="w-4 h-4 text-zenvy-violetSoft" />
-                <span>Buat Playlist Baru</span>
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                  <FolderPlus className="w-4 h-4" />
+                </div>
+                <span>Create New Playlist</span>
               </h3>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="p-1 rounded text-zinc-400 hover:text-white"
+                className="w-7 h-7 rounded-lg bg-[#25252B] text-zinc-400 hover:text-white flex items-center justify-center"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -372,28 +419,28 @@ export const Playlists = () => {
             <form onSubmit={handleCreatePlaylist} className="space-y-4 pt-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Nama Playlist *
+                  Playlist Name *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="misal: Alur Coding Malam"
+                  placeholder="e.g. Deep Focus Coding"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zenvy-obsidian border border-zenvy-border text-white text-xs focus:outline-none focus:border-zenvy-violet"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#121214] text-white text-xs focus:outline-none focus:ring-1 focus:ring-zenvy-primary"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Deskripsi Suasana (opsional)
+                  Description (optional)
                 </label>
                 <textarea
                   rows="3"
-                  placeholder="Untuk apa kurasi frekuensi ini didengarkan?"
+                  placeholder="What is this playlist for?"
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-zenvy-obsidian border border-zenvy-border text-white text-xs focus:outline-none focus:border-zenvy-violet resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#121214] text-white text-xs focus:outline-none focus:ring-1 focus:ring-zenvy-primary resize-none"
                 />
               </div>
 
@@ -401,16 +448,16 @@ export const Playlists = () => {
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting || !newName.trim()}
-                  className="px-4 py-2 rounded-lg bg-zenvy-violet hover:bg-purple-700 text-white text-xs font-semibold disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-zenvy-primary hover:bg-emerald-400 text-white text-xs font-bold disabled:opacity-50 shadow"
                 >
-                  {submitting ? 'Membuat...' : 'Buat & Buka Editor'}
+                  {submitting ? 'Creating...' : 'Create & Open Editor'}
                 </button>
               </div>
             </form>
@@ -418,41 +465,45 @@ export const Playlists = () => {
         </div>
       )}
 
-      {/* Modal Konfirmasi Hapus Playlist */}
+      {/* Modal: Confirm Delete Playlist */}
       {playlistToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-sm bg-zenvy-sidebar rounded-2xl p-6 border border-zenvy-border shadow-2xl relative space-y-4">
-            <div className="flex items-center gap-3 text-red-400">
-              <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center flex-shrink-0">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xl animate-fade-in">
+          <div className="w-full max-w-sm bg-[#1C1C1F] rounded-2xl p-6 shadow-2xl relative space-y-4 overflow-hidden">
+            {/* Glow in top-right corner */}
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-red-500/10 rounded-full blur-xl pointer-events-none" />
+            <div className="relative z-10 space-y-4">
+              <div className="flex items-center gap-3 text-red-400">
+              <div className="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center flex-shrink-0 text-red-400">
                 <Trash2 className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white">Hapus Playlist?</h3>
-                <p className="text-xs text-zenvy-muted">Tindakan ini tidak dapat dibatalkan.</p>
+                <h3 className="text-sm font-bold text-white">Delete Playlist?</h3>
+                <p className="text-xs text-zenvy-muted">This action cannot be undone.</p>
               </div>
             </div>
 
             <p className="text-xs text-zinc-300 leading-relaxed">
-              Apakah Anda yakin ingin menghapus playlist <strong className="text-white">"{playlistToDelete.name}"</strong>? Semua susunan lagu di dalamnya akan dihapus.
+              Are you sure you want to delete <strong className="text-white">"{playlistToDelete.name}"</strong>? All track listings in this playlist will be removed.
             </p>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setPlaylistToDelete(null)}
-                className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-white"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white"
                 disabled={deleting}
               >
-                Batal
+                Cancel
               </button>
               <button
                 type="button"
                 onClick={confirmDeletePlaylist}
                 disabled={deleting}
-                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow disabled:opacity-50"
               >
-                {deleting ? 'Menghapus...' : 'Ya, Hapus Playlist'}
+                {deleting ? 'Deleting...' : 'Delete Playlist'}
               </button>
+            </div>
             </div>
           </div>
         </div>

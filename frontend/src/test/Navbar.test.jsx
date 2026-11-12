@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import { AuthProvider } from '../context/AuthContext';
 
 describe('Navbar Component', () => {
-  it('renders ZENVY brand and tagline', () => {
+  it('renders ZENVY brand', () => {
     render(
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
@@ -16,7 +16,6 @@ describe('Navbar Component', () => {
     );
 
     expect(screen.getByText('ZENVY')).toBeInTheDocument();
-    expect(screen.getByText('Find Your Frequency')).toBeInTheDocument();
   });
 
   it('contains navigation links for Discover, Favorites, and Playlists', () => {

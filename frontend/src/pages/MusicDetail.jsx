@@ -7,8 +7,7 @@ import {
   Share2, 
   Check, 
   AlertCircle, 
-  Activity, 
-  Sparkles, 
+  Music, 
   Play,
   Pause
 } from 'lucide-react';
@@ -52,7 +51,7 @@ export const MusicDetail = () => {
       setIsFavorite(favs.some(f => (f.videoId || f.id) === tId));
       setSimilarTracks(allList.filter(item => (item.videoId || item.id) !== tId));
     } catch (err) {
-      setError('Gagal memuat informasi frekuensi lagu.');
+      setError('Failed to load track information.');
     } finally {
       setLoading(false);
     }
@@ -91,7 +90,7 @@ export const MusicDetail = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <LoadingSpinner message="Mendekode telemetri DNA musikal..." size="lg" />
+        <LoadingSpinner message="Loading track information..." size="lg" />
       </div>
     );
   }
@@ -99,17 +98,17 @@ export const MusicDetail = () => {
   if (error || !track) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 text-red-400 mx-auto flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-400 mx-auto flex items-center justify-center">
           <AlertCircle className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold text-white">Frekuensi Tidak Ditemukan</h2>
-        <p className="text-sm text-zenvy-muted">{error || 'Trek ini sedang tidak tersedia.'}</p>
+        <h2 className="text-xl font-bold text-white">Track Not Found</h2>
+        <p className="text-sm text-zenvy-muted">{error || 'This track is currently unavailable.'}</p>
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-zenvy-violet text-white text-xs font-semibold hover:bg-purple-700 transition"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zenvy-primary text-white text-xs font-bold hover:bg-emerald-400 transition shadow"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Beranda</span>
+          <span>Back to Home</span>
         </Link>
       </div>
     );
@@ -118,30 +117,32 @@ export const MusicDetail = () => {
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-8 py-6 space-y-8">
       
-      {/* Navigasi Atas */}
+      {/* Top Navigation */}
       <div className="flex items-center justify-between">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-zenvy-muted hover:text-white px-3 py-1.5 rounded-lg bg-zenvy-card hover:bg-zenvy-cardElevated border border-zenvy-border transition"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white px-3.5 py-2 rounded-xl bg-[#1C1C1F] hover:bg-[#25252B] transition shadow-sm"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Penemuan</span>
+          <span>Back to Discover</span>
         </Link>
 
         <div className="flex items-center gap-2">
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-zenvy-card border border-zenvy-border text-zinc-300 hover:text-white transition"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#1C1C1F] hover:bg-[#25252B] text-zinc-300 hover:text-white transition shadow-sm"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-zinc-300" /> : <Share2 className="w-3.5 h-3.5" />}
-            <span>{copied ? 'Tautan Disalin' : 'Bagikan'}</span>
+            {copied ? <Check className="w-3.5 h-3.5 text-zenvy-primary" /> : <Share2 className="w-3.5 h-3.5" />}
+            <span>{copied ? 'Link Copied' : 'Share'}</span>
           </button>
         </div>
       </div>
 
-      {/* Header Banner Resolusi Tinggi */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-zenvy-card via-zenvy-cardElevated to-zenvy-obsidian border border-zenvy-border flex flex-col md:flex-row items-center gap-6 shadow-2xl">
-        <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-xl overflow-hidden flex-shrink-0 border border-zenvy-border shadow-2xl bg-black">
+      {/* Header Showcase Banner with Ambient Glow in Top-Right Corner */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-950/30 via-[#1C1C1F] to-[#121214] p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 shadow-2xl">
+        <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-emerald-500/15 filter blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden flex-shrink-0 shadow-2xl bg-black">
           <img
             src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
             alt={track.title}
@@ -149,196 +150,139 @@ export const MusicDetail = () => {
           />
         </div>
 
-        <div className="space-y-3 text-center md:text-left flex-1 min-w-0">
-          <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded bg-zenvy-violet text-white text-[10px] font-bold uppercase tracking-wider">
-              {track.habitat || 'Suasana Suara'}
-            </span>
-            <span className="px-2 py-0.5 rounded bg-zenvy-card text-zinc-300 border border-zenvy-border text-[10px] font-mono font-semibold">
-              320kbps OPUS
-            </span>
-            {track.momentum && (
-              <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zenvy-border text-[10px] font-mono">
-                {track.momentum}
-              </span>
-            )}
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+        <div className="relative z-10 space-y-3 text-center md:text-left flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight">
             {track.title}
           </h1>
 
           <p className="text-sm text-zenvy-muted font-medium">
-            Dikurasi oleh <span className="text-white font-semibold">{track.channelTitle || 'Artis YouTube'}</span>
+            By <span className="text-white font-semibold">{track.channelTitle || 'YouTube Artist'}</span>
           </p>
 
           <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
             <button
               onClick={handleMainActionPlay}
-              className="px-6 py-2.5 rounded-lg bg-white text-black font-bold text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition shadow-lg"
+              className="px-6 py-2.5 rounded-xl bg-zenvy-primary hover:bg-emerald-600 text-white font-extrabold text-xs flex items-center gap-2.5 transition-colors duration-200 shadow-xl shadow-emerald-950/30"
             >
               {isCurrentActive && isPlaying ? (
                 <>
-                  <Pause className="w-4 h-4 fill-current text-black" />
-                  <span>Jeda Audio</span>
+                  <Pause className="w-4 h-4 fill-current text-white" />
+                  <span>Pause Track</span>
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 fill-current text-black" />
-                  <span>Putar Trek</span>
+                  <Play className="w-4 h-4 fill-current text-white" />
+                  <span>Play Track</span>
                 </>
               )}
             </button>
 
             <button
               onClick={handleToggleFavorite}
-              className={`px-4 py-2.5 rounded-lg border text-xs font-semibold flex items-center gap-2 transition ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition shadow-sm ${
                 isFavorite
-                  ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                  : 'bg-zenvy-card border-zenvy-border text-zinc-300 hover:text-white'
+                  ? 'bg-red-500/15 text-red-400'
+                  : 'bg-[#25252B] hover:bg-[#303036] text-zinc-300 hover:text-white'
               }`}
             >
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current text-red-400' : ''}`} />
-              <span>{isFavorite ? 'Tersimpan di Favorit' : 'Simpan Favorit'}</span>
+              <span>{isFavorite ? 'Saved to Favorites' : 'Add to Favorites'}</span>
             </button>
 
             <button
               onClick={() => setShowPlaylistModal(true)}
-              className="px-4 py-2.5 rounded-lg bg-zenvy-card hover:bg-zenvy-cardElevated border border-zenvy-border text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition"
+              className="px-4 py-2.5 rounded-xl bg-[#25252B] hover:bg-[#303036] text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah ke Playlist</span>
+              <span>Add to Playlist</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Grid Utama: Player Terikat & Terpadu + Panel DNA Musikal */}
+      {/* Main Grid: Media Player Canvas & Recommendations */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Kolom Kiri 8: Canvas Media Player yang Terpadu dengan Kontrol Bawah */}
+        {/* Left 8: Media Canvas */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black border border-zenvy-border shadow-2xl group">
+          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl group">
             <img
               src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
               alt={track.title}
-              className={`w-full h-full object-cover transition-all duration-500 ${
-                isCurrentActive && isPlaying ? 'scale-105 opacity-80' : 'opacity-70 group-hover:scale-105'
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                isCurrentActive && isPlaying ? 'opacity-85' : 'opacity-70 group-hover:opacity-90'
               }`}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/30 flex flex-col items-center justify-center gap-3">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/30 backdrop-blur-[1px] flex flex-col items-center justify-center gap-3">
               <button
                 onClick={handleMainActionPlay}
-                className="w-16 h-16 rounded-full bg-zenvy-violet hover:bg-purple-600 text-white flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition"
-                title={isCurrentActive && isPlaying ? 'Jeda Audio' : 'Putar Audio'}
+                className="w-16 h-16 rounded-full bg-zenvy-primary hover:bg-emerald-600 text-white flex items-center justify-center shadow-2xl shadow-emerald-950/30 transition-colors duration-200"
+                title={isCurrentActive && isPlaying ? 'Pause Audio' : 'Play Audio'}
               >
                 {isCurrentActive && isPlaying ? (
-                  <Pause className="w-7 h-7 fill-current" />
+                  <Pause className="w-7 h-7 fill-current text-white" />
                 ) : (
-                  <Play className="w-7 h-7 fill-current ml-1" />
+                  <Play className="w-7 h-7 fill-current ml-1 text-white" />
                 )}
               </button>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-white px-3 py-1 rounded-full bg-black/70 border border-white/20 shadow">
-                  {isCurrentActive && isPlaying ? 'Sedang Berputar di Panel Bawah' : 'Klik untuk Memutar Musik'}
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-white px-3 py-1 rounded-full bg-black/70 backdrop-blur-md shadow">
+                {isCurrentActive && isPlaying ? 'Now Playing in Bottom Bar' : 'Click to Play Audio'}
+              </span>
             </div>
           </div>
 
-          {/* Sinopsis Trek & Konteks Suasana */}
-          <div className="bg-zenvy-card rounded-xl p-5 border border-zenvy-border space-y-3">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider text-zenvy-violetSoft">
-              Sinopsis Trek & Konteks Suasana
+          {/* Track Synopsis */}
+          <div className="bg-[#1C1C1F] rounded-2xl p-6 space-y-3 shadow-lg">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+              Track Overview & Notes
             </h3>
             <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-              {track.description || 'Aliran audio frekuensi terkurasi untuk mendampingi sesi produktivitas dan relaksasi.'}
+              {track.description || 'High-fidelity audio stream for concentration, relaxation, and focus sessions.'}
             </p>
           </div>
         </div>
 
-        {/* Kolom Kanan 4: Data DNA Musikal & Rekomendasi Frekuensi Serupa */}
+        {/* Right 4: Similar Tracks */}
         <div className="lg:col-span-4 space-y-6">
-          
-          {/* Panel DNA Musikal */}
-          <div className="bg-zenvy-card rounded-xl p-5 border border-zenvy-border space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-zenvy-border">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-purple-400" />
-                <span>Data DNA Musikal Trek</span>
+          <div className="bg-[#1C1C1F] rounded-2xl p-6 space-y-4 shadow-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                <Music className="w-4 h-4" />
+              </div>
+              <h3 className="text-sm font-bold text-white tracking-tight">
+                Similar Recommendations
               </h3>
-              <span className="text-[10px] text-zinc-400 font-mono font-semibold">98.4 kHz Langsung</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded-lg bg-zenvy-obsidian border border-zenvy-border">
-                <span className="text-[10px] text-zenvy-muted uppercase font-bold">Tempo (BPM)</span>
-                <p className="text-base font-extrabold text-white font-mono mt-0.5">
-                  {track.bpm || 80}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-zenvy-obsidian border border-zenvy-border">
-                <span className="text-[10px] text-zenvy-muted uppercase font-bold">Tangga Nada Musik</span>
-                <p className="text-base font-extrabold text-zenvy-violetSoft font-mono mt-0.5">
-                  {track.musicalKey || 'F# Minor'}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-zenvy-obsidian border border-zenvy-border">
-                <span className="text-[10px] text-zenvy-muted uppercase font-bold">Rentang Dinamis</span>
-                <p className="text-sm font-bold text-zinc-200 font-mono mt-0.5">
-                  {track.lufs || '-14.0 LUFS'}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-zenvy-obsidian border border-zenvy-border">
-                <span className="text-[10px] text-zenvy-muted uppercase font-bold">Codec Audio</span>
-                <p className="text-sm font-bold text-zinc-300 font-mono mt-0.5">
-                  320k OPUS
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-2 text-[11px] text-zinc-400 border-t border-zenvy-border/60 space-y-1">
-              <p><span className="text-zinc-500">Tempat Mastering:</span> {track.masterStudio || 'ZENVY Acoustic Labs'}</p>
-              <p><span className="text-zinc-500">Mesin Telemetri:</span> YouTube Lossless IFrame JS</p>
-            </div>
-          </div>
-
-          {/* Rekomendasi Frekuensi Serupa (Penyelarasan Harmonik 87%–99%) */}
-          <div className="bg-zenvy-card rounded-xl p-5 border border-zenvy-border space-y-3">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-zenvy-violetSoft" />
-              <span>Rekomendasi Frekuensi Serupa (87–99%)</span>
-            </h3>
 
             <div className="space-y-2">
-              {similarTracks.slice(0, 3).map((sim) => {
+              {similarTracks.slice(0, 4).map((sim) => {
                 const simId = sim.videoId || sim.id;
                 return (
                   <div
                     key={simId}
                     onClick={() => playTrack(sim)}
-                    className="p-2.5 rounded-lg bg-zenvy-obsidian hover:bg-zenvy-cardElevated border border-zenvy-border flex items-center justify-between cursor-pointer transition group"
+                    className="p-2.5 rounded-xl bg-[#141416] hover:bg-[#24242A] flex items-center justify-between cursor-pointer transition group"
                   >
                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
                       <img
                         src={sim.thumbnailUrl}
                         alt={sim.title}
-                        className="w-9 h-9 rounded object-cover flex-shrink-0"
+                        className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
                       />
                       <div className="min-w-0">
-                        <h4 className="text-xs font-semibold text-white group-hover:text-zenvy-violetSoft truncate">
+                        <h4 className="text-xs font-semibold text-white group-hover:text-zenvy-primary truncate">
                           {sim.title}
                         </h4>
-                        <p className="text-[10px] text-zenvy-muted truncate">{sim.channelTitle}</p>
+                        <p className="text-[10px] text-zenvy-muted truncate mt-0.5">{sim.channelTitle}</p>
                       </div>
                     </div>
 
-                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-zenvy-card text-zinc-300 border border-zenvy-border whitespace-nowrap">
-                      {sim.harmonicMatch || 94}% cocok
-                    </span>
+                    <button
+                      className="w-7 h-7 rounded-lg bg-[#25252B] group-hover:bg-emerald-500/20 text-zinc-400 group-hover:text-emerald-400 flex items-center justify-center transition"
+                      title="Play"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                    </button>
                   </div>
                 );
               })}

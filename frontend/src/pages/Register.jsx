@@ -30,7 +30,7 @@ export const Register = () => {
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Please provide a valid email address.');
+      setError('Please enter a valid email address.');
       return;
     }
 
@@ -49,41 +49,41 @@ export const Register = () => {
       await register(username.trim(), email.trim(), password);
       navigate('/');
     } catch (err) {
-      setError(typeof err === 'string' ? err : 'Registration failed. Try again.');
+      setError(typeof err === 'string' ? err : 'Registration failed. Please try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-zenvy-card rounded-2xl p-8 border border-zenvy-border shadow-2xl relative overflow-hidden">
+    <div className="w-full h-full flex items-center justify-center p-4 overflow-hidden">
+      {/* Immersive Auth Card with Identity Design: Frosted Charcoal, Corner Glow, Glowing Tapered Bottom */}
+      <div className="w-full max-w-md bg-[#1C1C1F]/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 shadow-2xl relative overflow-hidden">
         
-        {/* Glow accent */}
+        {/* Glow in top-right corner inside the card */}
+        <div className="absolute -top-14 -right-14 w-52 h-52 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-
-        {/* Brand header */}
-        <div className="text-center mb-8">
-          <div className="h-14 w-52 mx-auto mb-3">
-            <ZenvyLogo idPrefix="register" />
+        {/* Brand Header */}
+        <div className="text-center mb-5 relative z-10">
+          <div className="flex justify-center mb-3">
+            <ZenvyLogo size="md" />
           </div>
 
-          <h1 className="text-2xl font-bold text-white tracking-tight">Create an Account</h1>
-          <p className="text-sm text-zenvy-muted mt-1">Start curating your unique frequency</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Create an Account</h1>
         </div>
 
-        {/* Error message */}
+        {/* Error Message */}
         {error && (
-          <div className="mb-6 p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2.5">
+          <div className="mb-4 p-3 rounded-2xl bg-red-500/10 text-red-400 text-xs flex items-center gap-2.5 relative z-10">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 relative z-10">
           <div>
-            <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               Username
             </label>
             <div className="relative">
@@ -93,14 +93,14 @@ export const Register = () => {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="zenvy_listener"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-zenvy-card border border-zenvy-border text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zenvy-violet focus:ring-1 focus:ring-zenvy-violet transition"
+                placeholder="username"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#121214] text-zenvy-text text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zenvy-primary transition shadow-inner"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               Email Address
             </label>
             <div className="relative">
@@ -111,13 +111,13 @@ export const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-zenvy-card border border-zenvy-border text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zenvy-violet focus:ring-1 focus:ring-zenvy-violet transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#121214] text-zenvy-text text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zenvy-primary transition shadow-inner"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               Password
             </label>
             <div className="relative">
@@ -128,13 +128,13 @@ export const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimum 6 characters"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-zenvy-card border border-zenvy-border text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zenvy-violet focus:ring-1 focus:ring-zenvy-violet transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#121214] text-zenvy-text text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zenvy-primary transition shadow-inner"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               Confirm Password
             </label>
             <div className="relative">
@@ -145,7 +145,7 @@ export const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repeat password"
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-zenvy-card border border-zenvy-border text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-zenvy-violet focus:ring-1 focus:ring-zenvy-violet transition"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#121214] text-zenvy-text text-sm placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zenvy-primary transition shadow-inner"
               />
             </div>
           </div>
@@ -153,31 +153,38 @@ export const Register = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full mt-2 py-3.5 px-4 rounded-xl bg-zenvy-violet hover:bg-zenvy-violetDark text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-zenvy-violet/25 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:hover:scale-100"
+            className="w-full mt-2 py-3.5 px-4 rounded-xl bg-zenvy-primary hover:bg-emerald-400 text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors duration-200 shadow-lg disabled:opacity-60"
           >
             {submitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
                 <span>Creating Account...</span>
               </>
             ) : (
               <>
-                <span>Join ZENVY</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Sign Up to ZENVY</span>
+                <ArrowRight className="w-4 h-4 text-white" />
               </>
             )}
           </button>
         </form>
 
         {/* Footer */}
-        <div className="mt-8 text-center text-xs text-zenvy-muted">
+        <div className="mt-8 text-center text-xs text-zenvy-muted relative z-10">
           Already have an account?{' '}
           <Link
             to="/login"
-            className="text-zenvy-violetLight hover:text-white font-semibold transition"
+            className="text-zenvy-primary hover:underline font-semibold transition"
           >
-            Sign in
+            Log in now
           </Link>
+        </div>
+
+        {/* Glowing bottom edge line: thick & luminous in the middle, fading to transparent at the left and right */}
+        <div className="absolute -bottom-[1px] inset-x-0 flex items-center justify-center pointer-events-none">
+          <div className="absolute w-3/4 h-3 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent blur-sm" />
+          <div className="absolute w-1/2 h-1.5 bg-gradient-to-r from-transparent via-emerald-300 to-transparent blur-[1px]" />
+          <div className="relative w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-400 via-50% to-transparent" />
         </div>
       </div>
     </div>
@@ -185,4 +192,3 @@ export const Register = () => {
 };
 
 export default Register;
-

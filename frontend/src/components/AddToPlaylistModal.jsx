@@ -46,7 +46,7 @@ export const AddToPlaylistModal = ({ isOpen, onClose, music }) => {
     e.preventDefault();
     if (!newPlaylistName.trim()) return;
     try {
-      const created = await playlistApi.create(newPlaylistName.trim(), 'Dibuat dari penemuan lagu');
+      const created = await playlistApi.create(newPlaylistName.trim(), 'Created from track discovery');
       await playlistApi.addTrack(created.id, music);
       setPlaylists((prev) => [created, ...prev]);
       setAddedIds((prev) => new Set(prev).add(created.id));
@@ -60,103 +60,108 @@ export const AddToPlaylistModal = ({ isOpen, onClose, music }) => {
   if (!isOpen || !music) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-zenvy-sidebar rounded-2xl border border-zenvy-border shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xl animate-fade-in">
+      {/* Modal Surface Charcoal Slate with Glassmorphism */}
+      <div className="w-full max-w-md bg-[#1C1C1F]/95 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden relative">
+        {/* Glow in top-right corner */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between p-4 border-b border-zenvy-border">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2.5">
-            <ListMusic className="w-5 h-5 text-zenvy-violetSoft" />
-            <h3 className="text-sm font-bold text-white">Tambahkan ke Playlist</h3>
+            <div className="w-8 h-8 rounded-lg bg-[#27272B] flex items-center justify-center text-zenvy-primary shadow-sm">
+              <ListMusic className="w-4 h-4" />
+            </div>
+            <h3 className="text-sm font-bold text-white">Add to Playlist</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-white"
+            className="w-8 h-8 rounded-lg bg-[#27272B] hover:bg-[#323238] flex items-center justify-center text-zinc-300 hover:text-white transition"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Konten */}
+        {/* Content */}
         <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto no-scrollbar">
-          <div className="text-xs text-zenvy-muted line-clamp-1">
-            Trek Tujuan: <strong className="text-white">{music.title}</strong>
+          <div className="text-xs text-zenvy-muted line-clamp-1 bg-[#121214]/60 px-3 py-2 rounded-lg">
+            Target Track: <strong className="text-white font-medium ml-1">{music.title}</strong>
           </div>
 
-          {/* Form Buat Cepat */}
+          {/* Quick Create Form */}
           {isCreating ? (
             <form onSubmit={handleCreateNew} className="flex gap-2">
               <input
                 type="text"
                 autoFocus
-                placeholder="Nama playlist baru..."
+                placeholder="New playlist name..."
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
-                className="flex-1 px-3 py-2 text-xs rounded-lg bg-zenvy-obsidian border border-zenvy-violet text-white focus:outline-none"
+                className="flex-1 px-3 py-2 text-xs rounded-lg bg-zenvy-obsidian text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-zenvy-primary"
               />
               <button
                 type="submit"
-                className="px-3 py-2 rounded-lg bg-zenvy-violet text-white text-xs font-semibold hover:bg-purple-700"
+                className="px-3.5 py-2 rounded-lg bg-zenvy-primary hover:bg-emerald-400 text-white text-xs font-bold transition shadow-sm"
               >
-                Buat
+                Create
               </button>
               <button
                 type="button"
                 onClick={() => setIsCreating(false)}
-                className="px-2 py-2 text-xs text-zinc-400 hover:text-white"
+                className="px-2.5 py-2 text-xs text-zinc-400 hover:text-white transition"
               >
-                Batal
+                Cancel
               </button>
             </form>
           ) : (
             <button
               onClick={() => setIsCreating(true)}
-              className="w-full py-2.5 px-3 rounded-lg border border-zenvy-border hover:border-zinc-500 bg-zenvy-card hover:bg-zenvy-cardElevated text-xs font-semibold text-zinc-200 flex items-center justify-center gap-2 transition"
+              className="w-full py-2.5 px-3 rounded-lg bg-zenvy-elevated hover:bg-[#323238] text-xs font-semibold text-zinc-200 flex items-center justify-center gap-2 transition"
             >
-              <Plus className="w-4 h-4" />
-              <span>Buat Playlist Baru</span>
+              <Plus className="w-4 h-4 text-zenvy-primary" />
+              <span>Create New Playlist</span>
             </button>
           )}
 
-          {/* Daftar Koleksi Playlist */}
+          {/* Playlist List */}
           <div className="space-y-2">
             {loading ? (
-              <p className="text-center text-xs text-zenvy-muted py-4">Memuat playlist...</p>
+              <p className="text-center text-xs text-zenvy-muted py-4">Loading playlists...</p>
             ) : playlists.length === 0 ? (
-              <p className="text-center text-xs text-zenvy-muted py-4">Belum ada playlist. Buat satu sekarang!</p>
+              <p className="text-center text-xs text-zenvy-muted py-4">No playlists yet. Create one now!</p>
             ) : (
               playlists.map((pl) => {
                 const isAdded = addedIds.has(pl.id);
                 return (
                   <div
                     key={pl.id}
-                    className="flex items-center justify-between p-3 rounded-xl bg-zenvy-card border border-zenvy-border transition"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#161619] hover:bg-zenvy-elevated transition"
                   >
                     <div>
-                      <h4 className="text-xs font-semibold text-white">{pl.name}</h4>
+                      <h4 className="text-xs font-semibold text-zenvy-text">{pl.name}</h4>
                       <p className="text-[11px] text-zenvy-muted">
-                        {pl.tracks?.length || 0} trek nada
+                        {pl.tracks?.length || 0} tracks
                       </p>
                     </div>
 
                     <button
                       onClick={() => !isAdded && handleAdd(pl.id)}
                       disabled={isAdded}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition ${
                         isAdded
-                          ? 'bg-zinc-800 text-zinc-300 border border-zinc-700 cursor-default'
-                          : 'bg-zenvy-violet text-white hover:bg-purple-700'
+                          ? 'bg-zenvy-elevated text-zenvy-primary cursor-default'
+                          : 'bg-zenvy-primary hover:bg-emerald-400 text-white shadow-sm'
                       }`}
                     >
                       {isAdded ? (
                         <>
                           <Check className="w-3.5 h-3.5" />
-                          <span>Ditambahkan</span>
+                          <span>Added</span>
                         </>
                       ) : (
                         <>
                           <Plus className="w-3.5 h-3.5" />
-                          <span>Tambahkan</span>
+                          <span>Add</span>
                         </>
                       )}
                     </button>
@@ -165,16 +170,6 @@ export const AddToPlaylistModal = ({ isOpen, onClose, music }) => {
               })
             )}
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-3 bg-zenvy-card border-t border-zenvy-border text-right">
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-zenvy-cardElevated hover:bg-zenvy-border"
-          >
-            Selesai
-          </button>
         </div>
       </div>
     </div>

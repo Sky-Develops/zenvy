@@ -3,11 +3,58 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    zoom: 1.3;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   body {
     font-family: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
-    background-color: #101014;
-    color: #FFFFFF;
-    overflow-x: hidden;
+    background-color: #121214;
+    color: #F4F4F5;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* Interaction affordances & accessibility (R-39, R-32) */
+  a[href],
+  button,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  summary,
+  select,
+  label[for],
+  [role="button"],
+  [role="tab"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Visible focus ring using Primary Accent Deep Emerald */
+  :focus-visible {
+    outline: 2px solid #059669;
+    outline-offset: 2px;
   }
 }
 
@@ -18,22 +65,22 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #101014;
+  background: #121214;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30303A;
+  background: #27272B;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8B5CF6;
+  background: #059669;
 }
 
 /* Custom utilities */
 .glass-panel {
-  background: #17171D;
-  border: 1px solid #30303A;
+  background: #1C1C1F;
+  border: 1px solid #27272B;
 }
 
 /* Hide scrollbar for clean horizontal pill carousels */

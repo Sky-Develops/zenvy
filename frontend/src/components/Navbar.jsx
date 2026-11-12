@@ -28,26 +28,18 @@ export const Navbar = () => {
   const navLinkClass = ({ isActive }) =>
     `flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
       isActive
-        ? 'bg-zenvy-card text-white border border-zenvy-border shadow-sm'
-        : 'text-zinc-400 hover:text-white hover:bg-zenvy-card'
+        ? 'bg-zenvy-elevated text-white font-semibold shadow-sm'
+        : 'text-zenvy-muted hover:text-white hover:bg-zenvy-elevated'
     }`;
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#101014] border-b border-zenvy-border">
+    <header className="sticky top-0 z-40 w-full bg-zenvy-obsidian border-b border-zenvy-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
           {/* Logo Brand */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="h-9 w-32">
-              <ZenvyLogo idPrefix="navbar" />
-            </div>
-            <div>
-              <span className="hidden sm:inline-block ml-2 text-xs text-zenvy-muted font-normal tracking-wide">
-                Find Your Frequency
-              </span>
-
-            </div>
+            <ZenvyLogo />
           </Link>
 
           {/* Desktop Navigation */}
@@ -91,14 +83,14 @@ export const Navbar = () => {
               <div className="flex items-center gap-2">
                 <Link
                   to="/login"
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:bg-zenvy-card transition-all"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[#27272B] hover:bg-[#323238] text-white transition-all shadow-sm"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Login</span>
                 </Link>
                 <Link
                   to="/register"
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-zenvy-violet hover:bg-zenvy-violetDark text-white transition-all shadow-md shadow-zenvy-violet/20 hover:scale-[1.02]"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-zenvy-primary text-white transition-all hover:bg-emerald-400"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>Register</span>
@@ -167,7 +159,7 @@ export const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium bg-zenvy-card text-zinc-200 border border-zenvy-border"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold bg-[#27272B] hover:bg-[#323238] text-white"
                 >
                   <LogIn className="w-4 h-4" />
                   <span>Login</span>
@@ -175,7 +167,7 @@ export const Navbar = () => {
                 <Link
                   to="/register"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-zenvy-violet text-white"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-zenvy-primary hover:bg-emerald-600 text-white"
                 >
                   <UserPlus className="w-4 h-4" />
                   <span>Register</span>

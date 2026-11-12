@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, CornerDownLeft } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { musicApi } from '../services/api';
 import { usePlayer } from '../context/PlayerContext';
@@ -8,7 +8,7 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('Semua');
+  const [activeTab, setActiveTab] = useState('All');
   const inputRef = useRef(null);
   const navigate = useNavigate();
   const { playTrack } = usePlayer();
@@ -36,6 +36,14 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
     handleSearch(val);
   };
 
+  const handleSubmit = (e) => {
+    if (e) e.preventDefault();
+    const cleanQuery = query.trim();
+    if (!cleanQuery) return;
+    onClose();
+    navigate(`/search?q=${encodeURIComponent(cleanQuery)}`);
+  };
+
   const handleSelectTrack = (track) => {
     playTrack(track);
     onClose();
@@ -45,44 +53,58 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-2xl bg-zenvy-sidebar rounded-xl border border-zenvy-border shadow-2xl overflow-hidden flex flex-col max-h-[75vh]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-black/80 animate-fade-in">
+      {/* Modal Card Surface with Frosted Glass Blur */}
+      <div className="w-full max-w-2xl bg-[#1C1C1F]/85 backdrop-blur-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[75vh] relative">
+        {/* Glow in top-right corner of card */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         
-        {/* Bilah Input Pencarian */}
-        <div className="relative border-b border-zenvy-border flex items-center px-4 py-3 bg-zenvy-card">
-          <Search className="w-5 h-5 text-zenvy-violetSoft mr-3 flex-shrink-0" />
+        {/* Search Input Bar with Submit to Dedicated Search Page */}
+        <form onSubmit={handleSubmit} className="relative flex items-center px-4 py-3 bg-[#1C1C1F]/90 gap-2 flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#27272B] flex items-center justify-center flex-shrink-0 text-zenvy-primary shadow-sm">
+            <Search className="w-4 h-4" />
+          </div>
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={onInputChange}
-            placeholder="Ketik judul lagu, musisi, tangga nada (misal: F# Minor), atau suasana..."
-            className="w-full bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none"
+            placeholder="Search songs, artists, or genres..."
+            className="w-full bg-transparent text-sm text-zenvy-text placeholder-zinc-500 focus:outline-none"
           />
           {query && (
             <button
+              type="button"
               onClick={() => { setQuery(''); handleSearch(''); }}
-              className="p-1 rounded text-zinc-400 hover:text-white mr-2"
-              title="Hapus teks"
+              className="p-1 rounded text-zinc-400 hover:text-white"
+              title="Clear text"
             >
               <X className="w-4 h-4" />
             </button>
           )}
-          <kbd className="text-[10px] font-mono bg-zenvy-obsidian px-2 py-1 rounded border border-zenvy-border text-zinc-400">
+          {query.trim() && (
+            <button
+              type="submit"
+              className="px-3.5 py-1.5 rounded-xl bg-zenvy-primary hover:bg-emerald-600 text-white text-xs font-bold transition shadow-sm flex items-center gap-1.5 flex-shrink-0"
+            >
+              <span>Search</span>
+            </button>
+          )}
+          <kbd className="hidden sm:inline-block text-[10px] font-mono bg-[#121214] px-2 py-1 rounded text-zinc-400 flex-shrink-0">
             ESC
           </kbd>
-        </div>
+        </form>
 
-        {/* Tab Filter Pencarian */}
-        <div className="flex items-center gap-2 px-4 py-2 border-b border-zenvy-border bg-zenvy-obsidian text-xs">
-          {['Semua', 'Lagu', 'Suasana', 'Tangga Nada'].map((tab) => (
+        {/* Tab Filters */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#121214]/60 text-xs flex-shrink-0">
+          {['All', 'Tracks', 'Artists', 'Playlists'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1 rounded-md transition ${
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
                 activeTab === tab
-                  ? 'bg-zenvy-cardElevated text-white font-semibold border border-zenvy-border'
-                  : 'text-zenvy-muted hover:text-white'
+                  ? 'bg-zenvy-elevated text-white font-semibold'
+                  : 'text-zenvy-muted hover:text-white hover:bg-white/5'
               }`}
             >
               {tab}
@@ -90,12 +112,34 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
           ))}
         </div>
 
-        {/* Daftar Hasil */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {/* Results List */}
+        <div className="flex-1 overflow-y-auto p-2 space-y-1 no-scrollbar">
           {loading ? (
-            <p className="text-center text-xs text-zenvy-muted py-8">Memindai basis data frekuensi...</p>
+            <p className="text-center text-xs text-zenvy-muted py-8">Scanning music database...</p>
           ) : results.length === 0 ? (
-            <p className="text-center text-xs text-zenvy-muted py-8">Tidak ada frekuensi yang cocok.</p>
+            <div className="text-center py-10 px-4 space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#121214] text-zinc-500 flex items-center justify-center mx-auto shadow-inner">
+                <Search className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-white">
+                  {query ? `No instant recommendations for "${query}"` : 'Type any song or artist'}
+                </p>
+                <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+                  Search across the full YouTube audio database on the dedicated Search page.
+                </p>
+              </div>
+              {query.trim() && (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="px-5 py-2.5 rounded-xl bg-zenvy-primary hover:bg-emerald-600 text-white text-xs font-bold transition shadow-lg shadow-emerald-500/20 inline-flex items-center gap-2"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Search on Search Page</span>
+                </button>
+              )}
+            </div>
           ) : (
             results.map((track) => {
               const trackId = track.videoId || track.id;
@@ -103,53 +147,46 @@ export const GlobalSearchModal = ({ isOpen, onClose }) => {
                 <div
                   key={trackId}
                   onClick={() => handleSelectTrack(track)}
-                  className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-zenvy-card cursor-pointer transition border border-transparent hover:border-zenvy-border"
+                  className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-zenvy-elevated cursor-pointer transition"
                 >
                   <div className="flex items-center gap-3 min-w-0 pr-2">
                     <img
                       src={track.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
                       alt={track.title}
-                      className="w-10 h-10 rounded object-cover flex-shrink-0 bg-black"
+                      className="w-10 h-10 rounded-lg object-cover flex-shrink-0 bg-black shadow-sm"
                     />
                     <div className="min-w-0">
-                      <h4 className="text-xs font-semibold text-white group-hover:text-zenvy-violetSoft truncate">
+                      <h4 className="text-xs font-semibold text-zenvy-text group-hover:text-zenvy-primary truncate transition-colors">
                         {track.title}
                       </h4>
                       <div className="flex items-center gap-2 text-[11px] text-zenvy-muted mt-0.5">
                         <span className="truncate">{track.channelTitle}</span>
-                        {track.musicalKey && (
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-zenvy-cardElevated text-zinc-300 font-mono">
-                            {track.musicalKey}
-                          </span>
-                        )}
-                        {track.bpm && (
-                          <span className="text-[10px] text-zinc-400 font-mono font-medium">
-                            {track.bpm} BPM
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-zinc-500 group-hover:text-white">
-                    <span className="hidden sm:inline text-[11px]">Putar Langsung</span>
-                    <CornerDownLeft className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] text-zinc-300 font-medium px-2.5 py-1 rounded-md bg-[#27272B] group-hover:text-zenvy-primary transition">
+                    Play
+                  </span>
                 </div>
               );
             })
           )}
         </div>
 
-        {/* Pintasan Bawah */}
-        <div className="p-2.5 bg-zenvy-card border-t border-zenvy-border text-[11px] text-zinc-500 flex items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <span><kbd className="bg-zenvy-obsidian px-1.5 py-0.5 rounded border border-zenvy-border">↑↓</kbd> Navigasi</span>
-            <span><kbd className="bg-zenvy-obsidian px-1.5 py-0.5 rounded border border-zenvy-border">↵</kbd> Buka</span>
-            <span><kbd className="bg-zenvy-obsidian px-1.5 py-0.5 rounded border border-zenvy-border">Spasi</kbd> Putar/Jeda</span>
+        {/* Footer Action: Go to Dedicated Search Page */}
+        {query.trim() && results.length > 0 && (
+          <div className="p-2.5 border-t border-white/5 bg-[#1C1C1F]/60 flex-shrink-0">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="w-full py-2 px-3 rounded-xl bg-[#121214] hover:bg-[#25252B] text-xs font-semibold text-zinc-300 hover:text-white flex items-center justify-center gap-2 transition"
+            >
+              <Search className="w-3.5 h-3.5 text-emerald-400" />
+              <span>View full search results for "{query}" on Search page →</span>
+            </button>
           </div>
-          <span className="text-zinc-400 font-mono">320kbps Lossless</span>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -8,17 +8,22 @@ export default {
     extend: {
       colors: {
         zenvy: {
-          obsidian: '#101014',     // Deep obsidian black
-          sidebar: '#17171D',      // Sidebar & Surface Dim
-          surfaceDim: '#131317',
-          card: '#202027',         // Card Background
-          cardElevated: '#292932', // Secondary Elevated Surface
-          border: '#30303A',       // Structural Borders
-          violet: '#8B5CF6',       // Vibrant Electric Violet
-          violetSoft: '#A78BFA',   // Soft Lilac Violet
-          mint: '#A1A1AA',         // Neutral text tone
-          text: '#FFFFFF',         // Primary Typography
-          muted: '#A1A1AA',        // Secondary Muted Text
+          obsidian: '#121214',     // Background Utama (Obsidian Matte)
+          surface: '#1C1C1F',      // Surface / Card (Charcoal Slate)
+          card: '#1C1C1F',         // Surface / Card (Charcoal Slate)
+          sidebar: '#121214',      // Obsidian Matte
+          surfaceDim: '#121214',
+          elevated: '#27272B',     // Elevated Surface (Graphite)
+          cardElevated: '#27272B', // Elevated Surface (Graphite)
+          border: '#27272B',       // Subtle Graphite Border (hanya untuk elemen yang butuh)
+          primary: '#047857',      // Primary Accent (Deep Emerald, darker than #059669 / #10B981)
+          mint: '#047857',         // Deep Emerald
+          secondary: '#38BDF8',    // Secondary Accent (Steel Blue)
+          steel: '#38BDF8',        // Steel Blue
+          text: '#F4F4F5',         // Teks Utama (Off-White)
+          muted: '#A1A1AA',        // Teks Sekunder (Muted Zinc)
+          violet: '#047857',       // Backward compat -> Primary Accent
+          violetSoft: '#38BDF8',   // Backward compat -> Secondary Accent
         }
       },
       fontFamily: {

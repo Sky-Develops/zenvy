@@ -540,13 +540,13 @@ export const MusicPlayer = () => {
 
   return (
     <>
-      <aside aria-label="Pemutar Audio Persisten" className="fixed bottom-0 left-0 right-0 z-40 bg-zenvy-sidebar border-t border-zenvy-border shadow-xl">
+      <aside aria-label="Persistent Audio Player" className="fixed bottom-0 left-0 right-0 z-40 bg-[#1C1C1F]/90 backdrop-blur-2xl border-t border-white/10 shadow-2xl">
         
-        {/* Layar Video Bersih & Terpadu (Tanpa Overlay Bawaan YouTube) */}
-        <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-zenvy-border block" : "fixed -bottom-[9999px] -right-[9999px] w-[320px] h-[180px] pointer-events-none"}>
+        {/* Seamless Video Layer with backdrop blur */}
+        <div className={showVideo ? "max-w-4xl mx-auto p-4 border-b border-white/10 block animate-fade-in" : "fixed -bottom-[9999px] -right-[9999px] w-[320px] h-[180px] pointer-events-none"}>
           <div 
             ref={videoContainerRef} 
-            className="relative aspect-video w-full rounded-xl overflow-hidden bg-black shadow-2xl border border-zenvy-border group select-none"
+            className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl group select-none"
           >
             <iframe
               ref={iframeRef}
@@ -560,28 +560,28 @@ export const MusicPlayer = () => {
               onLoad={handleIframeLoad}
             />
 
-            {/* Overlay Interaktif (Bebas Overlay YouTube, Terhubung Langsung ke Panel Kontrol Musik) */}
+            {/* Interactive Overlay */}
             <div
               onClick={handleTogglePlay}
-              className="absolute inset-0 z-10 cursor-pointer flex items-center justify-center transition-colors hover:bg-black/20"
-              title={isPlaying ? "Klik untuk Menjeda" : "Klik untuk Memutar"}
+              className="absolute inset-0 z-10 cursor-pointer flex items-center justify-center transition-colors hover:bg-black/30 backdrop-blur-[1px]"
+              title={isPlaying ? "Click to Pause" : "Click to Play"}
             >
               {!isPlaying && (
-                <div className="w-16 h-16 rounded-full bg-zenvy-violet/90 text-white flex items-center justify-center shadow-2xl backdrop-blur-sm transition-transform hover:scale-110">
+                <div className="w-16 h-16 rounded-full bg-zenvy-primary text-white flex items-center justify-center shadow-2xl backdrop-blur-md transition-colors duration-200">
                   <Play className="w-8 h-8 fill-current ml-1 text-white" />
                 </div>
               )}
             </div>
 
-            {/* Bar Kontrol Atas Video */}
+            {/* Video Top Controls */}
             <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 pointer-events-auto">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleFullscreen();
                 }}
-                className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 text-zinc-300 hover:text-white border border-white/10 backdrop-blur-md transition shadow"
-                title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                className="w-8 h-8 rounded-lg bg-black/70 hover:bg-black/90 text-zinc-300 hover:text-white backdrop-blur-md transition shadow flex items-center justify-center"
+                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
@@ -590,8 +590,8 @@ export const MusicPlayer = () => {
                   e.stopPropagation();
                   setShowVideo(false);
                 }}
-                className="p-1.5 rounded-lg bg-black/70 hover:bg-black/90 text-zinc-300 hover:text-white border border-white/10 backdrop-blur-md transition shadow"
-                title="Sembunyikan Video (Hanya Audio Musik)"
+                className="w-8 h-8 rounded-lg bg-black/60 hover:bg-black/80 text-zinc-300 hover:text-white backdrop-blur-md transition flex items-center justify-center"
+                title="Close Video"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -599,28 +599,28 @@ export const MusicPlayer = () => {
           </div>
         </div>
 
-        {/* Spanduk Notifikasi Error Pemutaran */}
+        {/* Playback Error / Restriction Banner */}
         {hasError && (
-          <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 flex items-center justify-center gap-2 text-xs text-red-400">
+          <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 flex items-center justify-center gap-2 text-xs text-amber-400">
             <AlertCircle className="w-3.5 h-3.5" />
-            <span>Catatan pemutaran: Embed dibatasi hak cipta YouTube. Audio stream tetap dicoba diputar.</span>
+            <span>Playback notice: Embed restricted by provider. Audio playback remains active.</span>
           </div>
         )}
 
-        {/* Grid 3-Zona Pemutar Audio */}
+        {/* 3-Zone Audio Player Grid */}
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-2.5 grid grid-cols-12 items-center gap-4">
           
-          {/* ZONA 1 (Kiri 3 Kolom): Info Lagu */}
+          {/* ZONE 1 (Left 3 Columns): Track Info */}
           <div className="col-span-4 sm:col-span-3 flex items-center gap-3 min-w-0">
-            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-black border border-zenvy-border shadow-sm">
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-black shadow-md">
               <img
                 src={currentTrack.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
                 alt={currentTrack.title}
                 className="w-full h-full object-cover"
               />
               {isPlaying && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <Radio className="w-4 h-4 text-white" />
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex items-center justify-center">
+                  <Radio className="w-4 h-4 text-zenvy-primary" />
                 </div>
               )}
             </div>
@@ -628,100 +628,93 @@ export const MusicPlayer = () => {
             <div className="min-w-0">
               <Link
                 to={`/music/${trackId}`}
-                className="block text-xs sm:text-sm font-semibold text-white hover:text-zinc-300 truncate"
+                className="block text-xs sm:text-sm font-semibold text-zenvy-text hover:text-white truncate"
               >
                 {currentTrack.title}
               </Link>
               <p className="text-[11px] text-zenvy-muted truncate">
-                {currentTrack.channelTitle || 'Artis'}
+                {currentTrack.channelTitle || 'Artist'}
               </p>
-              {currentTrack.musicalKey && (
-                <div className="hidden lg:flex items-center gap-1.5 text-[10px] text-zinc-400 mt-0.5">
-                  <span className="font-mono text-zinc-300">{currentTrack.musicalKey}</span>
-                  <span>•</span>
-                  <span className="font-mono text-zinc-400">{currentTrack.bpm || 80} BPM</span>
-                </div>
-              )}
             </div>
 
-            {/* Tombol Simpan Favorit & Tambah Playlist di Player */}
-            <div className="flex items-center gap-0.5 ml-1">
+            {/* Like & Add to Playlist Buttons with high-contrast containers */}
+            <div className="flex items-center gap-1 ml-1">
               <button
                 onClick={handleToggleFavoriteInPlayer}
-                className={`p-1.5 rounded transition ${
-                  isFav ? 'text-red-500 bg-red-500/10' : 'text-zinc-400 hover:text-red-400 hover:bg-zenvy-cardElevated'
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition shadow-sm ${
+                  isFav ? 'text-red-500 bg-red-500/15' : 'bg-[#25252B] text-zinc-300 hover:text-red-400 hover:bg-[#303036]'
                 }`}
-                title={isFav ? "Hapus dari Favorit" : "Simpan ke Favorit"}
+                title={isFav ? "Remove from Liked Songs" : "Save to Liked Songs"}
               >
                 <Heart className={`w-4 h-4 ${isFav ? 'fill-current text-red-500' : ''}`} />
               </button>
 
               <button
                 onClick={() => setModalMusic(currentTrack)}
-                className="p-1.5 rounded text-zinc-400 hover:text-white hover:bg-zenvy-cardElevated transition"
-                title="Tambahkan ke Playlist Saya"
+                className="w-8 h-8 rounded-lg bg-[#25252B] text-zinc-300 hover:text-white hover:bg-[#303036] flex items-center justify-center transition shadow-sm"
+                title="Add to Playlist"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* ZONA 2 (Tengah 6 Kolom): Kontrol Putar & Bilah Waktu Terikat 100% */}
+          {/* ZONE 2 (Center 6 Columns): Playback Controls & Scrubber */}
           <div className="col-span-5 sm:col-span-6 flex flex-col items-center gap-1.5">
             
-            {/* Tombol Kontrol Nyata */}
-            <div className="flex items-center gap-3 sm:gap-5">
+            {/* Control Buttons with High-Contrast Containers */}
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setIsShuffle(!isShuffle)}
-                className={`p-1 rounded text-xs transition ${
-                  isShuffle ? 'text-white' : 'text-zinc-400 hover:text-white'
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs transition shadow-sm ${
+                  isShuffle ? 'text-zenvy-secondary bg-zenvy-secondary/15 font-semibold' : 'bg-[#25252B] text-zinc-400 hover:text-white hover:bg-[#303036]'
                 }`}
-                title="Acak Trek"
+                title="Shuffle"
               >
                 <Shuffle className="w-3.5 h-3.5" />
               </button>
 
               <button
                 onClick={handleRewind10}
-                className="p-1 rounded text-zinc-400 hover:text-white transition"
-                title="Mundur 10 Detik"
+                className="w-8 h-8 rounded-lg bg-[#25252B] text-zinc-300 hover:text-white hover:bg-[#303036] flex items-center justify-center transition shadow-sm"
+                title="Rewind 10s"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
 
               <button
                 onClick={handleTogglePlay}
-                className="w-9 h-9 rounded-full bg-white text-black hover:bg-zinc-200 flex items-center justify-center shadow transition"
-                aria-label={isPlaying ? 'Jeda' : 'Putar'}
+                className="w-11 h-11 rounded-full bg-zenvy-primary text-white hover:bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-950/30 transition-colors duration-200"
+                aria-label={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
-                  <Pause className="w-4 h-4 fill-current text-black" />
+                  <Pause className="w-5 h-5 fill-current text-white" />
                 ) : (
-                  <Play className="w-4 h-4 fill-current ml-0.5 text-black" />
+                  <Play className="w-5 h-5 fill-current ml-0.5 text-white" />
                 )}
               </button>
 
               <button
                 onClick={handleForward10}
-                className="p-1 rounded text-zinc-400 hover:text-white transition"
-                title="Maju 10 Detik"
+                className="w-8 h-8 rounded-lg bg-[#25252B] text-zinc-300 hover:text-white hover:bg-[#303036] flex items-center justify-center transition shadow-sm"
+                title="Forward 10s"
               >
                 <RotateCw className="w-3.5 h-3.5" />
               </button>
 
               <button
                 onClick={() => setIsLoop(!isLoop)}
-                className={`p-1 rounded text-xs transition ${
-                  isLoop ? 'text-white' : 'text-zinc-400 hover:text-white'
+                className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs transition shadow-sm ${
+                  isLoop ? 'text-zenvy-secondary bg-zenvy-secondary/15 font-semibold' : 'bg-[#25252B] text-zinc-400 hover:text-white hover:bg-[#303036]'
                 }`}
-                title="Ulangi Lagu Ini"
+                title="Repeat Track"
               >
                 <Repeat className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {/* Time Scrubber Bar Terpadu (Anti-Macet, Anti-Jumping & Presisi 100%) */}
-            <div className="w-full max-w-lg flex items-center gap-2 text-[11px] font-mono text-zinc-400">
+            {/* Time Scrubber Bar */}
+            <div className="w-full max-w-lg flex items-center gap-2 text-[11px] font-mono text-zenvy-muted">
               <span className="w-10 text-right">{formatTime(displayTime)}</span>
               <input
                 type="range"
@@ -736,45 +729,39 @@ export const MusicPlayer = () => {
                 onChange={handleSeekChange}
                 onKeyUp={handleSeekCommit}
                 style={{
-                  background: `linear-gradient(to right, #8b5cf6 ${progressPercent}%, #27272a ${progressPercent}%)`
+                  background: `linear-gradient(to right, #059669 ${progressPercent}%, #27272B ${progressPercent}%)`
                 }}
-                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-white hover:accent-zinc-200 transition-all"
+                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-zenvy-primary transition-all"
               />
               <span className="w-10 text-left">{formatTime(effectiveDuration)}</span>
             </div>
           </div>
 
-          {/* ZONA 3 (Kanan 3 Kolom): Solid Badge, Layar Video & Volume Terikat */}
-          <div className="col-span-3 flex items-center justify-end gap-2.5">
-            
-            {/* Lencana Solid */}
-            <span className="hidden xl:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zenvy-card text-zinc-300 border border-zenvy-border">
-              320k OPUS
-            </span>
-
-            {/* Tombol Tampilkan / Sembunyikan Layar Video */}
+          {/* ZONE 3 (Right 3 Columns): Video Toggle, Volume & Close (Without box containers) */}
+          <div className="col-span-3 flex items-center justify-end gap-3">
+            {/* Video Screen Toggle Button (Expand/Collapse Icon) */}
             <button
               onClick={() => setShowVideo(!showVideo)}
-              className={`p-1.5 rounded-lg border text-xs flex items-center gap-1 transition ${
+              className={`p-1.5 rounded-lg transition-colors ${
                 showVideo
-                  ? 'bg-zenvy-violet border-zenvy-violet text-white shadow-sm'
-                  : 'bg-zenvy-card border-zenvy-border text-zinc-400 hover:text-white'
+                  ? 'text-zenvy-primary hover:text-emerald-300'
+                  : 'text-zinc-400 hover:text-white'
               }`}
-              title={showVideo ? 'Sembunyikan Layar Video (Hanya Musik)' : 'Buka Layar Video Bersih'}
+              title={showVideo ? 'Collapse Video' : 'Expand Video'}
             >
               {showVideo ? (
-                <Video className="w-3.5 h-3.5 text-white" />
+                <Minimize2 className="w-4 h-4 text-zenvy-primary" />
               ) : (
-                <VideoOff className="w-3.5 h-3.5" />
+                <Maximize2 className="w-4 h-4" />
               )}
             </button>
 
-            {/* Pengatur Volume Suara */}
-            <div className="hidden sm:flex items-center gap-1.5">
+            {/* Volume Control */}
+            <div className="hidden sm:flex items-center gap-2">
               <button
                 onClick={handleToggleMute}
-                className="text-zinc-400 hover:text-white p-1"
-                title={isMuted ? 'Nyalakan Suara' : 'Bisukan'}
+                className="text-zinc-400 hover:text-white transition"
+                title={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX className="w-4 h-4 text-red-400" />
@@ -788,14 +775,15 @@ export const MusicPlayer = () => {
                 max="100"
                 value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-16 h-1 bg-zenvy-border rounded-lg appearance-none cursor-pointer accent-zinc-300"
+                className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-zenvy-primary"
               />
             </div>
 
+            {/* Close Player Button */}
             <button
               onClick={closePlayer}
-              className="p-1 text-zinc-400 hover:text-white transition"
-              title="Tutup Pemutar"
+              className="p-1.5 text-zinc-400 hover:text-white transition"
+              title="Close Player"
             >
               <X className="w-4 h-4" />
             </button>

@@ -1,6 +1,6 @@
 import React from 'react';
+import { Play, Heart, Plus, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Play, Heart, Plus, ExternalLink, Sparkles } from 'lucide-react';
 import { usePlayer } from '../context/PlayerContext';
 
 export const MusicCard = ({
@@ -9,9 +9,12 @@ export const MusicCard = ({
   onToggleFavorite,
   onAddToPlaylist,
   showRemoveFavorite = false,
-  onRemoveFavorite,
+  onRemoveFavorite
 }) => {
-  const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const { currentTrack, isPlaying, playTrack } = usePlayer();
+
+  if (!music) return null;
+
   const trackId = music.videoId || music.id;
   const isCurrentActive = (currentTrack?.videoId || currentTrack?.id) === trackId;
 
@@ -40,125 +43,128 @@ export const MusicCard = ({
   };
 
   return (
-    <div className="group relative bg-zenvy-card hover:bg-zenvy-cardElevated rounded-lg p-3 border border-zenvy-border hover:border-zinc-500 transition-all duration-200 flex flex-col justify-between shadow-md">
-      
-      {/* Thumbnail Container */}
-      <div className="relative aspect-video w-full rounded-md overflow-hidden bg-zenvy-obsidian mb-3">
-        <img
-          src={music.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
-          alt={music.title}
-          loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={(e) => {
-            e.target.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80';
-          }}
-        />
+    <div className="relative group flex flex-col">
+      {/* Main Card Surface: Frosted glass blur with corner glow and hover tapered bottom outline */}
+      <div className="relative flex-1 bg-[#1C1C1F]/85 backdrop-blur-xl hover:bg-[#232328] rounded-2xl p-3.5 transition-colors duration-200 flex flex-col justify-between shadow-xl overflow-hidden">
+        
+        {/* Glow inside card in the top-right corner */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 group-hover:scale-125 transition-all duration-500 pointer-events-none" />
 
-        {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
+        {/* Thumbnail Container with Ambient Overlay & Blur */}
+        <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-black mb-3.5 shadow-inner">
+          <img
+            src={music.thumbnailUrl || `https://i.ytimg.com/vi/${trackId}/hqdefault.jpg`}
+            alt={music.title}
+            loading="lazy"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src = 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80';
+            }}
+          />
 
-        {/* Play Button Overlay */}
-        <button
-          onClick={handlePlayClick}
-          aria-label={`Play ${music.title}`}
-          className={`absolute inset-0 m-auto w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 ${
-            isCurrentActive && isPlaying
-              ? 'bg-zenvy-violet text-white scale-100 shadow-md ring-2 ring-white/50'
-              : 'bg-zenvy-violet text-white opacity-0 group-hover:opacity-100 group-hover:scale-105 hover:bg-purple-600 shadow-md'
-          }`}
-        >
-          <Play className="w-5 h-5 fill-current ml-0.5" />
-        </button>
+          {/* Ambient Gradient Overlay with subtle blur */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent backdrop-blur-[1px] opacity-70 group-hover:opacity-40 transition-opacity" />
 
-        {/* Solid badge (tanpa transparansi neon) */}
-        <div className="absolute top-2 left-2 flex items-center gap-1.5">
-          {music.momentum && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/90 text-zinc-300 border border-zinc-700 flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5" />
-              {music.momentum}
-            </span>
+          {/* Play Button Overlay (Clean solid mint, no bright wireframe outline) */}
+          <button
+            onClick={handlePlayClick}
+            aria-label={`Play ${music.title}`}
+            className={`absolute inset-0 m-auto w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-2xl ${
+              isCurrentActive && isPlaying
+                ? 'bg-zenvy-primary text-white shadow-emerald-950/30'
+                : 'bg-zenvy-primary text-white opacity-90 sm:opacity-0 group-hover:opacity-100 hover:bg-emerald-600 shadow-lg'
+            }`}
+          >
+            <Play className="w-5 h-5 fill-current ml-0.5 text-white" />
+          </button>
+
+          {/* Active playback badge */}
+          {isCurrentActive && (
+            <div className="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-md bg-zenvy-primary text-[10px] font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+              <div className="flex items-end gap-[1.5px] h-2.5">
+                <span className="w-[1.5px] h-2 bg-white animate-pulse" />
+                <span className="w-[1.5px] h-2.5 bg-white animate-pulse [animation-delay:0.2s]" />
+                <span className="w-[1.5px] h-1.5 bg-white animate-pulse [animation-delay:0.4s]" />
+              </div>
+              PLAYING
+            </div>
           )}
         </div>
 
-        {/* Active playback indicator (Statis tanpa kedip) */}
-        {isCurrentActive && (
-          <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-zenvy-violet text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1 shadow">
-
-            Aktif
+        {/* Info & Typography */}
+        <div className="flex-1 flex flex-col justify-between">
+          <div>
+            <Link
+              to={`/music/${trackId}`}
+              className="block text-sm font-semibold text-zenvy-text group-hover:text-zenvy-primary line-clamp-2 leading-snug transition-colors mb-1"
+              title={music.title}
+            >
+              {music.title}
+            </Link>
+            <p className="text-xs text-zenvy-muted line-clamp-1 mb-3">
+              {music.channelTitle || 'YouTube Music'}
+            </p>
           </div>
-        )}
-      </div>
 
-      {/* Info & Sonic DNA */}
-      <div className="flex-1 flex flex-col justify-between">
-        <div>
-          <Link
-            to={`/music/${trackId}`}
-            className="block text-sm font-semibold text-white group-hover:text-zenvy-violetSoft line-clamp-2 leading-snug transition-colors mb-1"
-            title={music.title}
-          >
-            {music.title}
-          </Link>
-          <p className="text-xs text-zenvy-muted line-clamp-1 mb-2">
-            {music.channelTitle || 'YouTube Music'}
-          </p>
+          {/* Action Buttons */}
+          <div className="flex items-center justify-between pt-2.5">
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleFavoriteClick}
+                title={isFavorite || showRemoveFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center transition shadow-sm ${
+                  isFavorite || showRemoveFavorite
+                    ? 'text-red-500 bg-red-500/15'
+                    : 'bg-[#25252B] text-zinc-300 hover:text-red-400 hover:bg-[#303036]'
+                }`}
+              >
+                <Heart
+                  className={`w-3.5 h-3.5 ${isFavorite || showRemoveFavorite ? 'fill-current' : ''}`}
+                />
+              </button>
 
-          {/* Sonic DNA pill line (Bersih netral) */}
-          <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 mb-3 flex-wrap">
-            {music.musicalKey && (
-              <span className="px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border font-mono text-zinc-300">
-                {music.musicalKey}
-              </span>
-            )}
-            {music.bpm && (
-              <span className="px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border font-mono text-zinc-300">
-                {music.bpm} BPM
-              </span>
-            )}
-            {music.lufs && (
-              <span className="px-1.5 py-0.5 rounded bg-zenvy-obsidian border border-zenvy-border font-mono text-zinc-400">
-                {music.lufs}
-              </span>
-            )}
+              {onAddToPlaylist && (
+                <button
+                  onClick={handlePlaylistClick}
+                  title="Add to Playlist"
+                  className="w-7 h-7 rounded-lg bg-[#25252B] text-zinc-300 hover:text-white hover:bg-[#303036] flex items-center justify-center transition shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handlePlayClick}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors duration-200 shadow-sm ${
+                  isCurrentActive && isPlaying
+                    ? 'bg-zenvy-primary text-white shadow-emerald-950/30'
+                    : 'bg-zenvy-primary hover:bg-emerald-600 text-white'
+                }`}
+                title="Play Track"
+              >
+                <Play className="w-3 h-3 fill-current text-white" />
+                <span>{isCurrentActive && isPlaying ? 'Playing' : 'Play'}</span>
+              </button>
+
+              <Link
+                to={`/music/${trackId}`}
+                title="View Details"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-zinc-300 hover:text-white px-2 py-1 rounded-lg bg-[#25252B] hover:bg-[#303036] transition shadow-sm"
+              >
+                <span>Detail</span>
+                <ExternalLink className="w-3 h-3 text-zinc-400" />
+              </Link>
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-zenvy-border/60">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleFavoriteClick}
-              title={isFavorite || showRemoveFavorite ? 'Remove from favorites' : 'Add to favorites'}
-              className={`p-1.5 rounded-md transition ${
-                isFavorite || showRemoveFavorite
-                  ? 'text-red-500 hover:text-red-400 bg-red-500/10'
-                  : 'text-zinc-400 hover:text-red-400 hover:bg-zenvy-cardElevated'
-              }`}
-            >
-              <Heart
-                className={`w-3.5 h-3.5 ${isFavorite || showRemoveFavorite ? 'fill-current' : ''}`}
-              />
-            </button>
-
-            {onAddToPlaylist && (
-              <button
-                onClick={handlePlaylistClick}
-                title="Add to Playlist"
-                className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zenvy-cardElevated transition"
-              >
-                <Plus className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-
-          <Link
-            to={`/music/${trackId}`}
-            title="Inspect Detail"
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-zenvy-muted hover:text-white px-2 py-1 rounded hover:bg-zenvy-cardElevated transition"
-          >
-            <span>Detail</span>
-            <ExternalLink className="w-3 h-3" />
-          </Link>
+        {/* Hover glowing bottom outline: thick & luminous in the center, tapering to left and right */}
+        <div className="absolute -bottom-[1px] inset-x-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute w-3/4 h-2.5 bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent blur-sm" />
+          <div className="absolute w-1/2 h-1 bg-gradient-to-r from-transparent via-emerald-300 to-transparent blur-[1px]" />
+          <div className="relative w-full h-[1.5px] bg-gradient-to-r from-transparent via-emerald-400 via-50% to-transparent" />
         </div>
       </div>
     </div>

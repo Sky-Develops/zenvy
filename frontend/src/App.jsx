@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { PlayerProvider } from './context/PlayerContext';
+import { PlayerProvider, usePlayer } from './context/PlayerContext';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MusicPlayer from './components/MusicPlayer';
@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import Explore from './pages/Explore';
 import Search from './pages/Search';
 import EditPlaylist from './pages/EditPlaylist';
+import CreatePlaylist from './pages/CreatePlaylist';
 import MusicDetail from './pages/MusicDetail';
 import Favorites from './pages/Favorites';
 import Playlists from './pages/Playlists';
@@ -20,18 +21,18 @@ import { Radio } from 'lucide-react';
 
 const NotFound = () => (
   <div className="min-h-[70vh] flex flex-col items-center justify-center text-center p-6 space-y-4">
-    <div className="w-14 h-14 rounded-xl bg-zenvy-card text-zenvy-violetSoft flex items-center justify-center border border-zenvy-border">
+    <div className="w-14 h-14 rounded-2xl bg-[#1C1C1F] text-zenvy-primary flex items-center justify-center shadow-lg">
       <Radio className="w-7 h-7" />
     </div>
-    <h2 className="text-2xl font-bold text-white">404 — Frekuensi Terputus</h2>
+    <h2 className="text-2xl font-bold text-white">404: Page Not Found</h2>
     <p className="text-xs text-zenvy-muted max-w-sm">
-      Kanal atau frekuensi yang Anda tuju sedang tidak aktif atau telah berpindah alamat.
+      The page or track you're looking for doesn't exist or has moved.
     </p>
     <Link
       to="/"
-      className="px-5 py-2.5 rounded-lg bg-zenvy-violet text-white text-xs font-semibold hover:bg-purple-700 transition"
+      className="px-5 py-2.5 rounded-xl bg-zenvy-primary text-white text-xs font-bold hover:bg-emerald-400 transition shadow-sm"
     >
-      Kembali ke Beranda
+      Back to Home
     </Link>
   </div>
 );
@@ -39,6 +40,10 @@ const NotFound = () => (
 function AppShell() {
   const [isOmnibarOpen, setIsOmnibarOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const { currentTrack, isPlayerOpen } = usePlayer();
+  const hasActivePlayer = Boolean(isPlayerOpen && currentTrack);
 
   // Pintasan Keyboard Global: Ctrl+K / Cmd+K untuk Omnibar
   useEffect(() => {
@@ -57,7 +62,7 @@ function AppShell() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-zenvy-obsidian text-zenvy-text overflow-hidden select-none">
+    <div className="flex h-full w-full bg-zenvy-obsidian text-zenvy-text overflow-hidden overscroll-none select-none">
       
       {/* 1. Sidebar Kiri Persisten (Tanpa Paywall/PRO) */}
       <Sidebar onOpenOmnibar={() => setIsOmnibarOpen(true)} />
@@ -69,14 +74,14 @@ function AppShell() {
             className="fixed inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="relative w-64 bg-zenvy-sidebar border-r border-zenvy-border h-full z-10">
+          <div className="relative w-64 bg-zenvy-sidebar border-r border-zenvy-border h-full z-10 overflow-hidden overscroll-none">
             <Sidebar onOpenOmnibar={() => { setIsMobileMenuOpen(false); setIsOmnibarOpen(true); }} />
           </div>
         </div>
       )}
 
       {/* Kontainer Utama */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden overscroll-none">
         
         {/* 2. Header Atas Persisten */}
         <Header 
@@ -85,11 +90,19 @@ function AppShell() {
         />
 
         {/* Tampilan Konten Dinamis */}
-        <main className="flex-1 overflow-y-auto pb-32">
+        <main 
+          className={`flex-1 overflow-y-auto overscroll-contain ${
+            isAuthPage 
+              ? 'overflow-hidden flex flex-col items-center justify-center' 
+              : hasActivePlayer ? 'pb-24' : 'pb-6'
+          }`}
+        >
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/playlist/create" element={<CreatePlaylist />} />
+            <Route path="/playlists/create" element={<CreatePlaylist />} />
             <Route path="/playlist/:id/edit" element={<EditPlaylist />} />
             <Route path="/playlists/:id/edit" element={<EditPlaylist />} />
             <Route path="/playlists" element={<Playlists />} />
