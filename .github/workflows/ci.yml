@@ -2,9 +2,9 @@ name: ZENVY CI Pipeline
 
 on:
   push:
-    branches: [ "master", "main", "tegar-devops", "iqbal-auth", "rizky-frontend" ]
+    branches: [ "master", "tegar-devops", "iqbal-auth", "rizky-frontend" ]
   pull_request:
-    branches: [ "master", "main" ]
+    branches: [ "master" ]
 
 jobs:
   test:
