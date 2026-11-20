@@ -7,7 +7,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   return res.status(200).json({
-    message: "Welcome to ZENVY API!",
+    message: "Welcome to ZENVY!",
     status: "success",
   });
 });
