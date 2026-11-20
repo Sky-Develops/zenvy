@@ -1,0 +1,35 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { BrowserRouter } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import { AuthProvider } from '../context/AuthContext';
+
+describe('Navbar Component', () => {
+  it('renders ZENVY brand', () => {
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AuthProvider>
+          <Navbar />
+        </AuthProvider>
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText('ZENVY')).toBeInTheDocument();
+  });
+
+  it('contains navigation links for Discover, Favorites, and Playlists', () => {
+    render(
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <AuthProvider>
+          <Navbar />
+        </AuthProvider>
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText('Discover')).toBeInTheDocument();
+    expect(screen.getByText('Favorites')).toBeInTheDocument();
+    expect(screen.getByText('Playlists')).toBeInTheDocument();
+  });
+});
+
