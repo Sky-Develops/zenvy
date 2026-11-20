@@ -1,0 +1,36 @@
+services:
+  app:
+    build: .
+    container_name: zenvy-app
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DATABASE_URL=postgresql://zenvy_user:zenvy_pass@db:5432/zenvy_db
+    depends_on:
+      - db
+    networks:
+      - zenvy-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: zenvy-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=zenvy_user
+      - POSTGRES_PASSWORD=zenvy_pass
+      - POSTGRES_DB=zenvy_db
+    volumes:
+      - zenvy_pgdata:/var/lib/postgresql/data
+    networks:
+      - zenvy-network
+    restart: unless-stopped
+
+networks:
+  zenvy-network:
+    driver: bridge
+
+volumes:
+  zenvy_pgdata:
