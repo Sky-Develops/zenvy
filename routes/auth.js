@@ -12,7 +12,7 @@ const { requireAuth } = require('../middleware/auth');
 router.post('/register', (req, res) => {
   const { username, email, password } = req.body || {};
 
-  if (!username || typeof username !== 'string' || username.trim().length < 3) {
+  if (!username || typeof username !== 'string' || usernameakun.trim().length < 3) {
     return res.status(400).json({
       status: 'error',
       message: 'Username minimal 3 karakter.'
